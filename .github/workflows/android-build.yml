@@ -146,7 +146,7 @@ jobs:
 
   emulator-tests:
     name: Android emulator tests
-    runs-on: macos-14
+    runs-on: macos-15-intel
     steps:
       - name: Check out source
         uses: actions/checkout@v7
