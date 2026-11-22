@@ -181,10 +181,12 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import glob
+          import xml.etree.ElementTree as ET
           path = Path('gradle-connected-tests.log')
+          selected = []
           if path.exists():
               lines = path.read_text(errors='replace').splitlines()
-              selected = []
               cause_count = 0
               for index, line in enumerate(lines):
                   if '* What went wrong:' in line or 'FAILURE: Build failed' in line:
@@ -192,9 +194,51 @@ jobs:
                   elif line.lstrip().startswith('Caused by:') and cause_count < 3:
                       selected.extend(lines[index:index + 5])
                       cause_count += 1
-              message = '\n'.join(selected or lines[-45:])[-5000:]
+              message = '\n'.join(selected or lines[-45:])[-3500:]
               escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
               print(f'::error title=Emulator test diagnostics::{escaped}')
+          report_files = glob.glob('app/build/outputs/androidTest-results/connected/**/*.xml', recursive=True)
+          report_files += glob.glob('app/build/reports/androidTests/connected/**/*.xml', recursive=True)
+          failures = []
+          for report in report_files:
+              try:
+                  root = ET.parse(report).getroot()
+              except (ET.ParseError, OSError):
+                  continue
+              for case in root.iter('testcase'):
+                  for result in list(case):
+                      if result.tag in ('failure', 'error'):
+                          name = f"{case.attrib.get('classname', 'test')}#{case.attrib.get('name', 'unknown')}"
+                          detail = result.attrib.get('message', '').strip()
+                          if result.text and result.text.strip():
+                              detail += '\n' + result.text.strip()[:800]
+                          failures.append(f'{name}: {detail[:1200]}')
+          if failures:
+              message = '\n'.join(failures[:12])[:4500]
+              escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print(f'::error title=Android instrumented test failures::{escaped}')
+          PY
+
+      - name: Summarize emulator test results
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, xml.etree.ElementTree as ET
+          files = glob.glob('app/build/outputs/androidTest-results/connected/**/*.xml', recursive=True)
+          files += glob.glob('app/build/reports/androidTests/connected/**/*.xml', recursive=True)
+          totals = {'tests': 0, 'failures': 0, 'errors': 0, 'skipped': 0}
+          for path in set(files):
+              try:
+                  root = ET.parse(path).getroot()
+              except (ET.ParseError, OSError):
+                  continue
+              for key in totals:
+                  totals[key] += int(root.attrib.get(key, 0))
+          print('### API 35 emulator tests')
+          if not files:
+              print('No instrumented test result XML was produced.')
+          else:
+              print(f"{totals['tests']} tests; {totals['failures']} failures; {totals['errors']} errors; {totals['skipped']} skipped.")
           PY
 
       - name: Upload emulator test reports
