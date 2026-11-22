@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.media3.common.util.UnstableApi;
 
+@UnstableApi
 public final class SplashActivity extends Activity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
