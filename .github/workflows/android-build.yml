@@ -51,7 +51,15 @@ jobs:
           path = Path('gradle-test-debug.log')
           if path.exists():
               lines = path.read_text(errors='replace').splitlines()
-              message = '\n'.join(lines[-45:])[-5000:]
+              selected = []
+              cause_count = 0
+              for index, line in enumerate(lines):
+                  if '* What went wrong:' in line or 'FAILURE: Build failed' in line:
+                      selected.extend(lines[index:index + 18])
+                  elif line.lstrip().startswith('Caused by:') and cause_count < 3:
+                      selected.extend(lines[index:index + 5])
+                      cause_count += 1
+              message = '\n'.join(selected or lines[-45:])[-5000:]
               escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
               print(f'::error title=Gradle JVM test diagnostics::{escaped}')
           PY
@@ -67,7 +75,15 @@ jobs:
           path = Path('gradle-lint.log')
           if path.exists():
               lines = path.read_text(errors='replace').splitlines()
-              message = '\n'.join(lines[-45:])[-5000:]
+              selected = []
+              cause_count = 0
+              for index, line in enumerate(lines):
+                  if '* What went wrong:' in line or 'FAILURE: Build failed' in line:
+                      selected.extend(lines[index:index + 18])
+                  elif line.lstrip().startswith('Caused by:') and cause_count < 3:
+                      selected.extend(lines[index:index + 5])
+                      cause_count += 1
+              message = '\n'.join(selected or lines[-45:])[-5000:]
               escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
               print(f'::error title=Gradle lint diagnostics::{escaped}')
           PY
@@ -168,7 +184,15 @@ jobs:
           path = Path('gradle-connected-tests.log')
           if path.exists():
               lines = path.read_text(errors='replace').splitlines()
-              message = '\n'.join(lines[-45:])[-5000:]
+              selected = []
+              cause_count = 0
+              for index, line in enumerate(lines):
+                  if '* What went wrong:' in line or 'FAILURE: Build failed' in line:
+                      selected.extend(lines[index:index + 18])
+                  elif line.lstrip().startswith('Caused by:') and cause_count < 3:
+                      selected.extend(lines[index:index + 5])
+                      cause_count += 1
+              message = '\n'.join(selected or lines[-45:])[-5000:]
               escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
               print(f'::error title=Emulator test diagnostics::{escaped}')
           PY
