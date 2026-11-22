@@ -178,7 +178,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: default
           arch: x86_64
           profile: pixel_6
           cores: 4
@@ -186,7 +186,8 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 600
           pre-emulator-launch-script: |
-            nohup bash -c '
+            printf 'Pre-launch diagnostics started at %s\n' "$(date -Is)" > emulator-boot-diagnostics.log
+            nohup setsid -f bash -c '
               for attempt in $(seq 1 120); do
                 {
                   printf "\n--- emulator boot probe %s ---\n" "$(date -Is)"
