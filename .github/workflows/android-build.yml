@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew --no-daemon clean
 
       - name: Run JVM unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
+        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace 2>&1 | tee gradle-test-debug.log
 
       - name: Run Android lint
         run: ./gradlew --no-daemon lintDebug
@@ -81,6 +81,15 @@ jobs:
             app/build/test-results/testDebugUnitTest/
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Upload Gradle diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: beatbox-gradle-diagnostics
+          path: gradle-test-debug.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v6

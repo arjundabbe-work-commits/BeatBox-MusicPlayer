@@ -1,47 +1,47 @@
 # BeatBox
 
-BeatBox is an early native Android music-player reconstruction. The original splash branding and gradient are retained, and the first functional foundation focuses on device music and offline playback.
+BeatBox is a native Android Java music player for audio stored on the device. The project keeps the recovered BeatBox splash screen, gradient theme, and original XML files while rebuilding the runtime around Media3 and Room.
 
-## Current features
+## Implemented
 
-- Timed BeatBox splash screen.
-- Local audio discovery through Android MediaStore.
-- Runtime music permission prompts for Android 13+ and earlier supported Android versions.
+- MediaStore audio discovery with runtime permission handling and manual refresh.
 - Local title, artist, and album search.
-- Media3/ExoPlayer playback in a `MediaSessionService`, with basic queue, play/pause, previous/next, and seek controls.
-- A mini-player and Android's default media-session notification integration.
+- Media3 ExoPlayer playback in a `MediaSessionService`, shared through `MediaController`.
+- Now Playing with seek, shuffle, repeat, favourite toggle, queue entry point, and album art loading off the UI thread.
+- Mini-player, OS media-session notification, and handling for audio becoming noisy.
+- Room persistence for favourites, playlists and ordered playlist tracks, listening history, queue snapshots, and settings.
+- Favorites, playlist management/detail, queue, recent history, settings, and about screens.
+- JVM tests for local search/sort/time algorithms; Room and local-fixture playback instrumentation tests.
+- GitHub Actions for JVM tests, lint, debug/release APK builds, and API 35 emulator instrumentation.
 
-The **application ID `com.beatbox.player` is provisional**. Confirm the final package ID before release; changing it after publishing would create a different app identity.
+Online streaming, sign-in/cloud sync, lyrics, equalizer/audio effects, sleep timer, crossfade, video browsing, and a full albums/artists/folders/genres library are not implemented. The app does not claim access to an online catalogue.
 
-## Project structure
+## Build
 
-- `app/src/main/java/com/beatbox/player/` — activities, song model, and playback service.
-- `app/src/main/res/layout/` — runtime XML layouts, including the preserved splash layout.
-- `app/src/main/res/drawable/` and `values/` — gradient, fallback artwork, vector note, and theme.
-- `docs/original-layouts/` — exact copies of the eight XML layouts recovered from the original `master` branch.
-- `.github/workflows/android-build.yml` — hosted Android build, unit-test task, and debug APK artifact workflow.
-
-## Requirements and build
-
-- JDK 17 or newer (Android Gradle Plugin 8.13 requires JDK 17; CI uses Temurin 17).
-- Android SDK Platform 36 and Build Tools 36.0.0.
-- Gradle 8.13, downloaded by the included Gradle wrapper.
-- Internet access for the initial Gradle and AndroidX dependency downloads.
-
-Open this repository folder in Android Studio and allow Gradle sync. From the repository root, run:
+Requirements: JDK 17, Android SDK Platform 36, Android Build Tools 36.0.0, and the included Gradle 8.13 wrapper.
 
 ```powershell
-.\gradlew.bat testDebugUnitTest assembleDebug
+.\gradlew.bat clean testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
-The GitHub Actions workflow runs the equivalent tasks on pushes to `codex/beatbox-android-reconstruction` and on pull requests targeting `main`, `master`, or that development branch. It uploads `app/build/outputs/apk/debug/app-debug.apk` when the build succeeds.
+For instrumentation tests, start an API 35 Google APIs emulator and run:
 
-There are currently no project-authored unit tests. The `testDebugUnitTest` task is included so tests can be added to the build without changing CI.
+```powershell
+.\gradlew.bat connectedDebugAndroidTest
+```
 
-## Limitations
+Open this repository in Android Studio and allow Gradle sync to download project dependencies. The app ID is `com.beatbox.player` (version `1.0`, code `1`). The hosted workflow uploads the debug APK and test reports on successful builds.
 
-- Favorites, Room playlists, listening history, categories for albums/artists/folders/genres, shuffle/repeat UI, artwork extraction, and queue persistence are not implemented.
-- Search uses the in-memory scan held by Home.
-- Background playback and media-session notification support are implemented through Media3's service architecture but still require emulator and physical-device verification.
-- GitHub Actions completed a successful hosted `testDebugUnitTest assembleDebug` run on the development branch. The debug APK is available as the `beatbox-debug-apk` artifact on that run. The unit-test task passed, but there are no project-authored test cases yet.
-- No emulator or physical-device test has been completed.
+## Source map
+
+- `app/src/main/java/com/beatbox/player/` — screens, app process, and playback service.
+- `app/src/main/java/com/beatbox/player/data/` — Room entities and DAOs.
+- `app/src/main/java/com/beatbox/player/domain/` — library algorithms and track metadata.
+- `app/src/main/res/` — native XML layouts and BeatBox visual resources.
+- `docs/original-layouts/` — recovered original layouts preserved for reference.
+- `docs/DEVELOPMENT_STATUS.md` — verified feature and validation status.
+- `docs/DEVICE_TESTING.md` — physical-device checklist and setup.
+
+## Current validation status
+
+See [the development status report](docs/DEVELOPMENT_STATUS.md) for the latest CI run, known gaps, and verification boundaries. A successful hosted build is not evidence of Samsung Galaxy A35 testing; physical-device verification remains separate.
