@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.session.MediaController;
@@ -28,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-@UnstableApi
 public final class LibraryActivity extends AppCompatActivity {
     private static final String[] CATEGORIES = {"All songs", "Albums", "Artists", "Folders", "Genres", "Recently added", "Recently played", "Favourites", "Playlists"};
     private BeatBoxApp app;

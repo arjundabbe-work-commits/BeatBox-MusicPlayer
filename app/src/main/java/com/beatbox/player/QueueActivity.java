@@ -7,7 +7,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
@@ -16,7 +15,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 
-@UnstableApi
 public final class QueueActivity extends AppCompatActivity {
     private MediaController controller; private ListenableFuture<MediaController> future; private final List<Integer> positions=new ArrayList<>(); private final List<String> labels=new ArrayList<>(); private ArrayAdapter<String> adapter; private TextView empty;
     private final Player.Listener listener=new Player.Listener(){@Override public void onTimelineChanged(androidx.media3.common.Timeline t,int r){render();}@Override public void onMediaItemTransition(MediaItem item,int reason){render();}};

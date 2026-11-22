@@ -7,7 +7,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.session.MediaController;
@@ -19,7 +18,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 
-@UnstableApi
 public final class PlaylistDetailActivity extends AppCompatActivity {
     private BeatBoxApp app; private long playlistId; private PlaylistEntity playlist;
     private final List<PlaylistTrackEntity> tracks=new ArrayList<>(); private final List<String> labels=new ArrayList<>();
