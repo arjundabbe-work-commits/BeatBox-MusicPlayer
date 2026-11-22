@@ -19,6 +19,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 | Media3 player, background service, media session, mini-player | Implemented; hosted emulator verification is in progress; physical device pending |
 | Queue snapshot persistence and queue UI | Implemented; verification pending |
 | Favourites, playlists, playlist ordering, history, settings persistence | Implemented; verification pending |
+| Sleep timer | Implemented with saved deadline and shared-controller pause; JVM calculation tests added; Android background behavior pending verification |
 | Albums, artists, folders, genres, recently added | Not implemented as browsing categories |
 | Local recommendations and song/artist/genre radio | Not implemented |
 | Lyrics and LRC synchronization | Not implemented |
@@ -32,6 +33,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 - GitHub Actions run #5, commit `e44a1fd`: JVM test step failed and the emulator job also failed; detailed logs were unavailable.
 - GitHub Actions run #6, commit `72c1a6a`: the JVM test step passed, Android lint failed, and APK build steps were skipped. The three authored JVM algorithm tests therefore passed on this run; no lint report was uploaded.
 - API 35 emulator instrumentation job for run #6 was still running at the time of this report; do not treat it as passed until its final result is recorded.
+- A later workflow run (#7, commit `3ac5bc9`) failed during the JVM test step before lint/build; this is intermittent relative to run #6, which passed the same test classes. The next workflow emits the failing Gradle output as a check annotation.
 - The Actions logs REST endpoint returns HTTP 403 (`Must have admin rights to Repository`) in this environment, so the failing step's console output could not be retrieved.
 - Local Gradle reproduction could not reach test execution because this workstation has no Android SDK configured (`ANDROID_HOME`/`sdk.dir` missing).
 - Lint, debug/release APK build, emulator tests, and physical-device tests are not verified on this commit.

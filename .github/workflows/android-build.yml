@@ -43,6 +43,19 @@ jobs:
       - name: Run JVM unit tests
         run: set -o pipefail; ./gradlew --no-daemon testDebugUnitTest --stacktrace 2>&1 | tee gradle-test-debug.log
 
+      - name: Surface JVM test failure details
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('gradle-test-debug.log')
+          if path.exists():
+              lines = path.read_text(errors='replace').splitlines()
+              message = '\n'.join(lines[-45:])[-5000:]
+              escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print(f'::error title=Gradle JVM test diagnostics::{escaped}')
+          PY
+
       - name: Run Android lint
         run: set -o pipefail; ./gradlew --no-daemon lintDebug --stacktrace 2>&1 | tee gradle-lint.log
 

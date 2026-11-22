@@ -11,6 +11,7 @@ BeatBox is a native Android Java music player for audio stored on the device. Th
 - Mini-player, OS media-session notification, and handling for audio becoming noisy.
 - Room persistence for favourites, playlists and ordered playlist tracks, listening history, queue snapshots, and settings.
 - Favorites, playlist management/detail, queue, recent history, settings, and about screens.
+- Configurable sleep timer with a persisted deadline, remaining-time display, cancel action, and pause through the shared MediaController.
 - JVM tests for local search/sort/time algorithms; Room and local-fixture playback instrumentation tests.
 - GitHub Actions for JVM tests, lint, debug/release APK builds, and API 35 emulator instrumentation.
 
