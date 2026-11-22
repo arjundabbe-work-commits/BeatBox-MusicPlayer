@@ -4,10 +4,11 @@ import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
+import androidx.annotation.NonNull;
 
 @Entity(tableName = "favorites", indices = {@Index("savedAt")})
 public class FavoriteEntity {
-    @PrimaryKey public String mediaId;
+    @NonNull @PrimaryKey public String mediaId;
     public String uri;
     public String title;
     public String artist;

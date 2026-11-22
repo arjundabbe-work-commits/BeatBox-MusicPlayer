@@ -7,10 +7,11 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Ignore;
+import androidx.annotation.NonNull;
 
 @Entity(tableName = "settings")
 class SettingEntity {
-    @PrimaryKey public String settingKey;
+    @NonNull @PrimaryKey public String settingKey;
     public String value;
     SettingEntity() { }
     @Ignore SettingEntity(String key, String value) { this.settingKey = key; this.value = value; }
