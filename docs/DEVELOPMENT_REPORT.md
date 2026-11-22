@@ -38,12 +38,13 @@ Partial or not implemented:
 
 ## Build and QA status
 
-- AGP 8.13.0 is paired with Gradle 8.13; Android's compatibility table confirms this pair. Java source and target are 17; the installed runtime is Java 23.0.1, which exceeds AGP's documented minimum but differs from the CI JDK.
-- `https://services.gradle.org/distributions/gradle-8.13-bin.zip` responds and redirects to GitHub release assets; the prior Gradle invocation stalled while retrieving the 130 MiB distribution. This indicates a slow/incomplete download in this environment rather than a confirmed Gradle or Android source failure.
-- No Android SDK, Android Studio, or `adb` is installed in this workspace. The workflow installs JDK 17 and SDK Platform 36 / Build Tools 36.0.0 and runs `testDebugUnitTest assembleDebug`.
-- No project-authored unit tests exist. The first workflow run (commit `330cff2`) failed at the Gradle launch step with exit code 126. Review identified that `gradlew` had been committed without its Unix executable bit; the follow-up commit restores it. That first run did not produce a Gradle build or test result. The follow-up workflow run is pending verification.
-- No successful build, APK, emulator test, or physical-device test is available. Do not treat the source implementation as compiled or tested until CI or a local Android toolchain completes successfully.
-- Earlier static checks parsed the 13 existing Android XML resources, confirmed layout drawable references, and passed `git diff --check`. Current changes still need the CI build validation.
+- AGP 8.13.0 is paired with Gradle 8.13; Android's compatibility table confirms this pair. Java source and target are 17; this workstation has Java 23.0.1, while CI uses Temurin 17.
+- The wrapper distribution URL responds and redirects to GitHub release assets. Local wrapper execution still times out on this workstation while opening the distribution connection. The hosted runner successfully downloaded the wrapper and dependencies.
+- Android Studio, Android SDK, and `adb` are not installed in this workspace. CI installs JDK 17 and SDK Platform 36 / Build Tools 36.0.0.
+- The first Actions run (commit `330cff2`) failed at wrapper launch with exit code 126 because `gradlew` lacked its Unix executable bit. The follow-up commit corrected the Git file mode. Actions run #2 succeeded on commit `e027fb7965569c07273dd63fbe428f7ea001d5b3`: `testDebugUnitTest` and `assembleDebug` completed, and the `beatbox-debug-apk` artifact was uploaded. There are no project-authored test cases, so no unit test cases ran.
+- Build result: compiled successfully on GitHub's hosted Ubuntu runner; debug APK generated and uploaded. No emulator or physical-device test has been performed.
+- Earlier static checks parsed the 13 existing Android XML resources, confirmed layout drawable references, and passed `git diff --check`.
+- CI workflow: https://github.com/arjundabbe-work-commits/BeatBox-MusicPlayer/actions/runs/45023251737
 
 ## Next three improvements
 

@@ -43,4 +43,5 @@ There are currently no project-authored unit tests. The `testDebugUnitTest` task
 - Favorites, Room playlists, listening history, categories for albums/artists/folders/genres, shuffle/repeat UI, artwork extraction, and queue persistence are not implemented.
 - Search uses the in-memory scan held by Home.
 - Background playback and media-session notification support are implemented through Media3's service architecture but still require emulator and physical-device verification.
-- No successful Android build or device test has yet been recorded. A workflow passing must not be inferred from its presence in this repository.
+- GitHub Actions completed a successful hosted `testDebugUnitTest assembleDebug` run on the development branch. The debug APK is available as the `beatbox-debug-apk` artifact on that run. The unit-test task passed, but there are no project-authored test cases yet.
+- No emulator or physical-device test has been completed.
