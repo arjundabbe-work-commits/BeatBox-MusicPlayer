@@ -8,10 +8,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.UnstableApi;
 import com.beatbox.player.data.PlaylistEntity;
 import java.util.ArrayList;
 import java.util.List;
 
+@UnstableApi
 public final class PlaylistsActivity extends AppCompatActivity {
     private BeatBoxApp app; private final List<PlaylistEntity> playlists=new ArrayList<>(); private final List<String> labels=new ArrayList<>(); private ArrayAdapter<String> adapter; private TextView empty;
     @Override protected void onCreate(Bundle state){super.onCreate(state);setContentView(R.layout.activity_playlists);app=(BeatBoxApp)getApplication();ListView list=findViewById(R.id.playlists_list);empty=findViewById(R.id.empty_playlists);adapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,labels);list.setAdapter(adapter);findViewById(R.id.create_playlist).setOnClickListener(v->create());list.setOnItemClickListener((p,v,pos,id)->{android.content.Intent intent=new android.content.Intent(this,PlaylistDetailActivity.class);intent.putExtra("playlist_id",playlists.get(pos).id);startActivity(intent);});list.setOnItemLongClickListener((p,v,pos,id)->{edit(playlists.get(pos));return true;});}
