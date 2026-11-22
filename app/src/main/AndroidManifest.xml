@@ -11,6 +11,7 @@
         <activity android:name=".PlaylistsActivity" android:exported="false" />
         <activity android:name=".PlaylistDetailActivity" android:exported="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".RecommendationsActivity" android:exported="false" />
         <activity android:name=".AboutUsActivity" android:exported="false" />
         <activity android:name=".RecentActivity" android:exported="false" />
         <activity android:name=".LibraryActivity" android:exported="false" />

@@ -18,6 +18,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import com.beatbox.player.domain.MusicAlgorithms;
+import com.beatbox.player.domain.RadioAlgorithms;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 
 @UnstableApi
@@ -36,9 +40,12 @@ public final class LibraryActivity extends AppCompatActivity {
     private TextView heading, message;
     private View trackActions;
     private String page = "categories";
+    private String radioMode = "SONG";
+    private String radioLabel;
     private final List<Song> tracks = new ArrayList<>();
     private final List<String> groupKeys = new ArrayList<>();
     private final Map<String, List<Song>> groups = new LinkedHashMap<>();
+    private final Map<Long, Set<String>> genresBySong = new HashMap<>();
     private MediaController controller;
     private ListenableFuture<MediaController> controllerFuture;
 
@@ -53,6 +60,7 @@ public final class LibraryActivity extends AppCompatActivity {
         findViewById(R.id.library_back).setOnClickListener(v -> navigateBack());
         findViewById(R.id.library_play_all).setOnClickListener(v -> playWholeList(false));
         findViewById(R.id.library_shuffle).setOnClickListener(v -> playWholeList(true));
+        findViewById(R.id.library_radio).setOnClickListener(v -> startRadio());
         findViewById(R.id.library_add_queue).setOnClickListener(v -> addListToQueue());
         itemsView.setOnItemClickListener((parent, view, position, id) -> onItemSelected(position));
         showCategories();
@@ -71,9 +79,9 @@ public final class LibraryActivity extends AppCompatActivity {
     private void onItemSelected(int position) {
         if (page.equals("categories")) {
             switch (CATEGORIES[position]) {
-                case "All songs": showTracks("All songs", MusicAlgorithms.sort(app.songs(), MusicAlgorithms.Sort.TITLE)); break;
-                case "Albums": groupSongs("Albums", song -> song.album + "  ·  " + song.artist); break;
-                case "Artists": groupSongs("Artists", song -> song.artist); break;
+                case "All songs": radioMode="SONG";showTracks("All songs", MusicAlgorithms.sort(app.songs(), MusicAlgorithms.Sort.TITLE)); break;
+                case "Albums": radioMode="ALBUM";groupSongs("Albums", song -> song.album + "  ·  " + song.artist); break;
+                case "Artists": radioMode="ARTIST";groupSongs("Artists", song -> song.artist); break;
                 case "Folders": groupSongs("Folders", song -> song.folder); break;
                 case "Recently added": {
                     List<Song> recent = new ArrayList<>(app.songs());
@@ -91,7 +99,7 @@ public final class LibraryActivity extends AppCompatActivity {
                 default: break;
             }
         } else if (page.equals("groups")) {
-            if (position >= 0 && position < groupKeys.size()) showTracks(groupKeys.get(position), groups.get(groupKeys.get(position)));
+            if (position >= 0 && position < groupKeys.size()) { radioLabel=groupKeys.get(position);showTracks(radioLabel, groups.get(radioLabel)); }
         } else if (page.equals("tracks")) {
             playTracks(position);
         }
@@ -115,6 +123,7 @@ public final class LibraryActivity extends AppCompatActivity {
     }
 
     private void loadGenres() {
+        radioMode="GENRE";genresBySong.clear();
         page = "loading";
         trackActions.setVisibility(View.GONE);
         heading.setText("Genres");
@@ -135,7 +144,10 @@ public final class LibraryActivity extends AppCompatActivity {
                             new String[]{MediaStore.Audio.Genres.Members.AUDIO_ID}, null, null, null)) {
                         if (rows != null) while (rows.moveToNext()) {
                             Song song = byId.get(rows.getLong(0));
-                            if (song != null) members.add(song);
+                            if (song != null) {
+                                members.add(song);
+                                genresBySong.computeIfAbsent(song.id, ignored -> new HashSet<>()).add(name);
+                            }
                         }
                     }
                     if (!members.isEmpty()) found.put(name, members);
@@ -166,15 +178,15 @@ public final class LibraryActivity extends AppCompatActivity {
 
     private void playTracks(int selected) {
         if (controller == null || selected < 0 || selected >= tracks.size()) return;
-        List<MediaItem> queue = mediaItems();
+        List<MediaItem> queue = mediaItems(tracks);
         controller.setMediaItems(queue, selected, 0);
         controller.prepare();
         controller.play();
     }
 
-    private List<MediaItem> mediaItems() {
+    private List<MediaItem> mediaItems(List<Song> source) {
         List<MediaItem> queue = new ArrayList<>();
-        for (Song song : tracks) queue.add(new MediaItem.Builder().setMediaId(Long.toString(song.id)).setUri(song.uri)
+        for (Song song : source) queue.add(new MediaItem.Builder().setMediaId(Long.toString(song.id)).setUri(song.uri)
                 .setMediaMetadata(new MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
                         .setAlbumTitle(song.album).setArtworkUri(song.artworkUri).build()).build());
         return queue;
@@ -183,7 +195,7 @@ public final class LibraryActivity extends AppCompatActivity {
     private void playWholeList(boolean shuffle) {
         if (tracks.isEmpty()) return;
         if (controller == null) { Toast.makeText(this, "Playback is connecting.", Toast.LENGTH_SHORT).show(); return; }
-        controller.setMediaItems(mediaItems());
+        controller.setMediaItems(mediaItems(tracks));
         controller.setShuffleModeEnabled(shuffle);
         controller.prepare();
         controller.play();
@@ -192,13 +204,34 @@ public final class LibraryActivity extends AppCompatActivity {
     private void addListToQueue() {
         if (tracks.isEmpty()) return;
         if (controller == null) { Toast.makeText(this, "Playback is connecting.", Toast.LENGTH_SHORT).show(); return; }
-        List<MediaItem> items = mediaItems();
+        List<MediaItem> items = mediaItems(tracks);
         if (controller.getMediaItemCount() == 0) {
             controller.setMediaItems(items);
             controller.prepare();
             controller.play();
         } else controller.addMediaItems(items);
         Toast.makeText(this, "Added " + items.size() + " tracks to the queue.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void startRadio() {
+        if (tracks.isEmpty()) return;
+        if (controller == null) { Toast.makeText(this, "Playback is connecting.", Toast.LENGTH_SHORT).show(); return; }
+        List<Song> station;
+        Song seed = tracks.get(0);
+        if ("ARTIST".equals(radioMode)) station = RadioAlgorithms.fromArtist(app.songs(), seed.artist, 50);
+        else if ("ALBUM".equals(radioMode)) station = RadioAlgorithms.fromAlbum(app.songs(), seed.album, 50);
+        else if ("GENRE".equals(radioMode) && radioLabel != null) {
+            String selectedGenre = radioLabel;
+            station = RadioAlgorithms.fromGenre(app.songs(), selectedGenre, song -> {
+                Set<String> genres = genresBySong.get(song.id);
+                if (genres == null) return null;
+                for (String genre : genres) if (genre.equalsIgnoreCase(selectedGenre)) return genre;
+                return null;
+            }, 50);
+        } else station = RadioAlgorithms.fromSeed(app.songs(), seed, 50);
+        if (station.isEmpty()) { Toast.makeText(this, "No local tracks are available for this radio.", Toast.LENGTH_SHORT).show(); return; }
+        controller.setMediaItems(mediaItems(station)); controller.prepare(); controller.play();
+        Toast.makeText(this, "Playing a local " + radioMode.toLowerCase(Locale.ROOT) + " radio.", Toast.LENGTH_SHORT).show();
     }
 
     private void navigateBack() {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@drawable/splash_gradient" android:padding="20dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Recommended for You" android:textColor="#FFFFFF" android:textSize="26sp"
+        android:textStyle="bold" android:paddingTop="18dp" android:paddingBottom="8dp" />
+    <TextView android:id="@+id/recommendation_message" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="Based on your listening and favourites"
+        android:textColor="#DDFFFFFF" android:paddingBottom="10dp" />
+    <ListView android:id="@+id/recommendation_tracks" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1" android:divider="#44777777"
+        android:dividerHeight="1dp" />
+</LinearLayout>

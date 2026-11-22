@@ -16,13 +16,14 @@ BeatBox is a native Android Java music player for audio stored on the device. Th
 - Configurable sleep timer with a persisted deadline, remaining-time display, cancel action, and pause through the shared MediaController.
 - Playback speed choices from 0.75× to 2×, persisted in Room and app preferences.
 - User-imported local `.lrc` or plain-text lyrics, with timestamp parsing and active-line highlighting for synchronized files.
-- Song-based local radio queues related tracks using actual artist/album metadata, with no online catalogue.
+- Song-based local radio and artist, album, and MediaStore genre-seeded queues use local metadata only; no online catalogue is implied.
+- Offline “Recommended for You” scoring from Room play counts, listening recency, favourites, artist affinity and album affinity. This new screen and scoring code await hosted CI verification.
 - JVM tests for local search/sort/time algorithms; Room and local-fixture playback instrumentation tests.
 - Espresso instrumentation flows for library navigation, local search, sleep timer, and the lyrics empty state.
 - MediaController connection coverage for the playback service session.
 - GitHub Actions for JVM tests, lint, debug/release APK builds, and API 35 emulator instrumentation.
 
-Online streaming, sign-in/cloud sync, lyrics, equalizer/audio effects, sleep timer, crossfade, video browsing, and a full albums/artists/folders/genres library are not implemented. The app does not claim access to an online catalogue.
+Outstanding work includes equalizer/audio effects, crossfade, categorized search, genre-aware recommendations, local video browsing, and complete restoration of the original runtime layouts. Lyrics, sleep timer, local library categories, and seeded local radio are implemented in source. The app does not claim access to an online catalogue.
 
 ## Build
 
@@ -38,7 +39,7 @@ For instrumentation tests, start an API 35 Google APIs emulator and run:
 .\gradlew.bat connectedDebugAndroidTest
 ```
 
-Open this repository in Android Studio and allow Gradle sync to download project dependencies. The app ID is `com.beatbox.player` (version `1.0`, code `1`). The hosted workflow uploads the debug APK and test reports on successful builds.
+Open this repository in Android Studio and allow Gradle sync to download project dependencies. The app ID is `com.beatbox.player` (version `1.0`, code `1`). The hosted workflow uploads the debug APK and test reports. Latest hosted build, lint, and JVM checks passed; API 35 instrumentation failed on emulator window focus and the WAV fixture location. Fixes are in the working tree pending a CI rerun; see [development status](docs/DEVELOPMENT_STATUS.md).
 
 ## Source map
 

@@ -23,6 +23,9 @@
 - [ ] Create, rename, delete, reorder, and play a playlist; restart and verify persistence.
 - [ ] Reorder/remove/clear the queue; restart and verify the saved queue behavior.
 - [ ] Check listening history, clear history, and reopen the app.
+- [ ] Check “Recommended for You” after building the current branch; verify it shows only local library tracks and updates based on listening/favourites.
+- [ ] Verify audio effects on this device only after an effect screen is added; effect availability depends on the device audio-effect implementation.
+- [ ] Verify categorized search and artist/genre/album radio after those controls are connected to the library.
 - [ ] Check battery use during extended background playback and verify playback stops cleanly when appropriate.
 - [ ] Update the app over an existing install and confirm user data remains available.
 

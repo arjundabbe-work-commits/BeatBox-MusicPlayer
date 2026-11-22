@@ -30,10 +30,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public final class BeatBoxUiTest {
     @Before public void grantAudioAccessForUiFlows() {
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        try (android.os.ParcelFileDescriptor ignored = automation.executeShellCommand("input keyevent KEYCODE_WAKEUP")) { }
+        try (android.os.ParcelFileDescriptor ignored = automation.executeShellCommand("wm dismiss-keyguard")) { }
         if (Build.VERSION.SDK_INT < 26) return;
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         String permission = Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_AUDIO : Manifest.permission.READ_EXTERNAL_STORAGE;
-        InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission(context.getPackageName(), permission);
+        automation.grantRuntimePermission(context.getPackageName(), permission);
     }
 
     @Test public void libraryCanOpenAlbumCategoryAndReturnToCategories() {

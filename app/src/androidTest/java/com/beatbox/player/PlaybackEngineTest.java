@@ -27,11 +27,14 @@ public class PlaybackEngineTest {
 
     @Before public void createPlayer() throws Exception {
         Context testContext=InstrumentationRegistry.getInstrumentation().getContext();
-        audioFile=new File(testContext.getCacheDir(),"test-tone.wav");
+        Context targetContext=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        // ExoPlayer reads the fixture as the target application, so place it in
+        // that package's cache rather than the separate instrumentation APK cache.
+        audioFile=new File(targetContext.getCacheDir(),"test-tone.wav");
         try(InputStream input=testContext.getAssets().open("test-tone.wav");FileOutputStream output=new FileOutputStream(audioFile)){
             byte[] buffer=new byte[8192];int count;while((count=input.read(buffer))!=-1)output.write(buffer,0,count);
         }
-        player=new ExoPlayer.Builder(InstrumentationRegistry.getInstrumentation().getTargetContext()).build();
+        player=new ExoPlayer.Builder(targetContext).build();
     }
     @After public void releasePlayer(){if(player!=null)player.release();if(audioFile!=null)audioFile.delete();}
 

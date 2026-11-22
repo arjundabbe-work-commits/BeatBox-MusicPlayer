@@ -70,6 +70,7 @@ public class HomeActivity extends AppCompatActivity {
         miniTitle = findViewById(R.id.mini_title); miniPlay = findViewById(R.id.mini_play);
         findViewById(R.id.search_button).setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
         findViewById(R.id.library_button).setOnClickListener(v -> startActivity(new Intent(this, LibraryActivity.class)));
+        findViewById(R.id.recommendations_button).setOnClickListener(v -> startActivity(new Intent(this, RecommendationsActivity.class)));
         findViewById(R.id.favorites_button).setOnClickListener(v -> startActivity(new Intent(this, FavoritesActivity.class)));
         findViewById(R.id.playlists_button).setOnClickListener(v -> startActivity(new Intent(this, PlaylistsActivity.class)));
         findViewById(R.id.recent_button).setOnClickListener(v -> startActivity(new Intent(this, RecentActivity.class)));

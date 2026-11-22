@@ -166,6 +166,11 @@ jobs:
       - name: Set up Gradle and cache
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Wake and unlock emulator display
+        run: |
+          adb shell input keyevent KEYCODE_WAKEUP
+          adb shell wm dismiss-keyguard
+
       - name: Run instrumented tests on API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
