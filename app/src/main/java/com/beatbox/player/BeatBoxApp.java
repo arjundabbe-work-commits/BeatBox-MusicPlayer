@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
 import androidx.room.Room;
@@ -76,6 +77,7 @@ public final class BeatBoxApp extends Application {
         }
     }
 
+    @UnstableApi
     private void pausePlaybackForSleepTimer() {
         timerPreferences().edit().remove(TIMER_DEADLINE).apply();
         SessionToken token = new SessionToken(this, new ComponentName(this, PlaybackService.class));
