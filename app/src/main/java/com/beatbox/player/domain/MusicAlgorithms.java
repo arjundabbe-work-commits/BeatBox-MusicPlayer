@@ -21,14 +21,16 @@ public final class MusicAlgorithms {
 
     public static <T extends TrackMetadata> List<T> sort(List<T> songs, Sort sort) {
         List<T> result = new ArrayList<>(songs);
-        Comparator<T> comparator;
-        switch (sort) {
-            case ARTIST: comparator = Comparator.comparing(s -> s.artist().toLowerCase(Locale.ROOT)); break;
-            case ALBUM: comparator = Comparator.comparing(s -> s.album().toLowerCase(Locale.ROOT)); break;
-            case DURATION: comparator = Comparator.comparingLong(TrackMetadata::durationMs); break;
-            default: comparator = Comparator.comparing(s -> s.title().toLowerCase(Locale.ROOT));
-        }
-        result.sort(comparator.thenComparingLong(TrackMetadata::stableId));
+        result.sort((left, right) -> {
+            int primary;
+            switch (sort) {
+                case ARTIST: primary = left.artist().toLowerCase(Locale.ROOT).compareTo(right.artist().toLowerCase(Locale.ROOT)); break;
+                case ALBUM: primary = left.album().toLowerCase(Locale.ROOT).compareTo(right.album().toLowerCase(Locale.ROOT)); break;
+                case DURATION: primary = Long.compare(left.durationMs(), right.durationMs()); break;
+                default: primary = left.title().toLowerCase(Locale.ROOT).compareTo(right.title().toLowerCase(Locale.ROOT));
+            }
+            return primary != 0 ? primary : Long.compare(left.stableId(), right.stableId());
+        });
         return result;
     }
 

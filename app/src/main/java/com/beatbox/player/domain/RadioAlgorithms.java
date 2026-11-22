@@ -1,7 +1,6 @@
 package com.beatbox.player.domain;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -14,11 +13,14 @@ public final class RadioAlgorithms {
         station.add(seed);
         List<T> remaining = new ArrayList<>();
         for (T candidate : library) if (candidate.stableId() != seed.stableId()) remaining.add(candidate);
-        remaining.sort(Comparator.comparing((T track) -> !same(track.artist(), seed.artist()))
-                .thenComparing(track -> !same(track.album(), seed.album()))
-                .thenComparing(track -> safe(track.artist()))
-                .thenComparing(track -> safe(track.title()))
-                .thenComparingLong(TrackMetadata::stableId));
+        remaining.sort((left, right) -> {
+            int comparison = Boolean.compare(!same(left.artist(), seed.artist()), !same(right.artist(), seed.artist()));
+            if (comparison == 0) comparison = Boolean.compare(!same(left.album(), seed.album()), !same(right.album(), seed.album()));
+            if (comparison == 0) comparison = safe(left.artist()).compareTo(safe(right.artist()));
+            if (comparison == 0) comparison = safe(left.title()).compareTo(safe(right.title()));
+            if (comparison == 0) comparison = Long.compare(left.stableId(), right.stableId());
+            return comparison;
+        });
         for (T candidate : remaining) {
             if (station.size() >= limit) break;
             station.add(candidate);

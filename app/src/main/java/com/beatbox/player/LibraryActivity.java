@@ -74,7 +74,10 @@ public final class LibraryActivity extends AppCompatActivity {
                 case "Folders": groupSongs("Folders", song -> song.folder); break;
                 case "Recently added": {
                     List<Song> recent = new ArrayList<>(app.songs());
-                    recent.sort(Comparator.comparingLong((Song song) -> song.dateAddedSeconds).reversed().thenComparing(song -> song.title.toLowerCase(Locale.ROOT)));
+                    recent.sort((left, right) -> {
+                        int byDate = Long.compare(right.dateAddedSeconds, left.dateAddedSeconds);
+                        return byDate != 0 ? byDate : left.title.toLowerCase(Locale.ROOT).compareTo(right.title.toLowerCase(Locale.ROOT));
+                    });
                     showTracks("Recently added", recent);
                     break;
                 }

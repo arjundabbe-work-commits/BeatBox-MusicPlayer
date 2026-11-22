@@ -1,7 +1,6 @@
 package com.beatbox.player.domain;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +43,8 @@ public final class LrcParser {
                 lines.add(new Line(-1, source));
             }
         }
-        lines.sort(Comparator.comparingLong(line -> line.timeMs < 0 ? Long.MAX_VALUE : line.timeMs));
+        lines.sort((left, right) -> Long.compare(left.timeMs < 0 ? Long.MAX_VALUE : left.timeMs,
+                right.timeMs < 0 ? Long.MAX_VALUE : right.timeMs));
         return lines;
     }
 }
