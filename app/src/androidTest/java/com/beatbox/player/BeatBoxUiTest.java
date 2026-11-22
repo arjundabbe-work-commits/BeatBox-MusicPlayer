@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public final class BeatBoxUiTest {
-    @Before public void grantAudioAccessForUiFlows() {
+    @Before public void grantAudioAccessForUiFlows() throws Exception {
         android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         try (android.os.ParcelFileDescriptor ignored = automation.executeShellCommand("input keyevent KEYCODE_WAKEUP")) { }
         try (android.os.ParcelFileDescriptor ignored = automation.executeShellCommand("wm dismiss-keyguard")) { }

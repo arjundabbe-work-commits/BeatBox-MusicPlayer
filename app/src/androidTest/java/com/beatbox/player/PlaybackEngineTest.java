@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,26 +36,40 @@ public class PlaybackEngineTest {
         try(InputStream input=testContext.getAssets().open("test-tone.wav");FileOutputStream output=new FileOutputStream(audioFile)){
             byte[] buffer=new byte[8192];int count;while((count=input.read(buffer))!=-1)output.write(buffer,0,count);
         }
-        player=new ExoPlayer.Builder(targetContext).build();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> player=new ExoPlayer.Builder(targetContext).build());
     }
-    @After public void releasePlayer(){if(player!=null)player.release();if(audioFile!=null)audioFile.delete();}
+    @After public void releasePlayer() {
+        if (player != null) InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> player.release());
+        if (audioFile != null) audioFile.delete();
+    }
 
     @Test public void decodesLocalAudioAndSupportsSeekPauseShuffleAndRepeat() throws Exception {
         ConditionVariable ready=new ConditionVariable();
-        player.addListener(new Player.Listener(){@Override public void onPlaybackStateChanged(int state){if(state==Player.STATE_READY)ready.open();}});
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> player.addListener(new Player.Listener(){@Override public void onPlaybackStateChanged(int state){if(state==Player.STATE_READY)ready.open();}}));
         MediaItem item=MediaItem.fromUri(Uri.fromFile(audioFile));
-        player.setMediaItems(Arrays.asList(item,item));player.prepare();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> { player.setMediaItems(Arrays.asList(item,item)); player.prepare(); });
         assertTrue("local WAV should become ready",ready.block(5000));
-        assertTrue("decoded duration should be positive",player.getDuration()>0);
-        player.seekTo(600);
-        player.setPlayWhenReady(true);
+        AtomicLong duration = new AtomicLong();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> duration.set(player.getDuration()));
+        assertTrue("decoded duration should be positive",duration.get()>0);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> { player.seekTo(600); player.setPlayWhenReady(true); });
         long deadline=System.currentTimeMillis()+3000;
-        while(!player.isPlaying()&&System.currentTimeMillis()<deadline)Thread.sleep(30);
-        assertTrue("ExoPlayer should start the local test fixture",player.isPlaying());
-        player.pause();assertTrue(!player.isPlaying());
-        player.setShuffleModeEnabled(true);assertTrue(player.getShuffleModeEnabled());
-        player.setRepeatMode(Player.REPEAT_MODE_ALL);assertEquals(Player.REPEAT_MODE_ALL,player.getRepeatMode());
-        player.setRepeatMode(Player.REPEAT_MODE_ONE);assertEquals(Player.REPEAT_MODE_ONE,player.getRepeatMode());
-        player.setRepeatMode(Player.REPEAT_MODE_OFF);
+        AtomicBoolean playing = new AtomicBoolean();
+        while(!playing.get()&&System.currentTimeMillis()<deadline) {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> playing.set(player.isPlaying()));
+            if (!playing.get()) Thread.sleep(30);
+        }
+        assertTrue("ExoPlayer should start the local test fixture",playing.get());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            player.pause();
+            assertTrue(!player.isPlaying());
+            player.setShuffleModeEnabled(true);
+            assertTrue(player.getShuffleModeEnabled());
+            player.setRepeatMode(Player.REPEAT_MODE_ALL);
+            assertEquals(Player.REPEAT_MODE_ALL,player.getRepeatMode());
+            player.setRepeatMode(Player.REPEAT_MODE_ONE);
+            assertEquals(Player.REPEAT_MODE_ONE,player.getRepeatMode());
+            player.setRepeatMode(Player.REPEAT_MODE_OFF);
+        });
     }
 }
