@@ -21,8 +21,8 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 | Queue snapshot persistence and queue UI | Implemented; verification pending |
 | Favourites, playlists, playlist ordering, history, settings persistence | Implemented; verification pending |
 | Sleep timer | Implemented with saved deadline and shared-controller pause; JVM calculation tests added; Android background behavior pending verification |
+| Lyrics | Local LRC/text import and playback-synchronized highlighting implemented; parser tests added; Android flow pending verification |
 | Local recommendations and song/artist/genre radio | Not implemented |
-| Lyrics and LRC synchronization | Not implemented |
 | Equalizer/audio effects, sleep timer, crossfade | Not implemented |
 | Video library, account/cloud sync, online music catalogue | Not implemented; no provider credentials or licensing configured |
 

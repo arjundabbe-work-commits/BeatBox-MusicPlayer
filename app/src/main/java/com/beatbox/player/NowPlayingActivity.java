@@ -69,6 +69,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
         repeat.setOnClickListener(v->{if(player()!=null){int mode=player().getRepeatMode();player().setRepeatMode(mode==Player.REPEAT_MODE_OFF?Player.REPEAT_MODE_ALL:mode==Player.REPEAT_MODE_ALL?Player.REPEAT_MODE_ONE:Player.REPEAT_MODE_OFF);}});
         favorite.setOnClickListener(v->toggleFavorite());
         findViewById(R.id.open_queue).setOnClickListener(v->startActivity(new android.content.Intent(this,QueueActivity.class)));
+        findViewById(R.id.open_lyrics).setOnClickListener(v->startActivity(new android.content.Intent(this,LyricsActivity.class)));
         progress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int value,boolean fromUser){}public void onStartTrackingTouch(SeekBar b){scrubbing=true;}public void onStopTrackingTouch(SeekBar b){if(player()!=null)player().seekTo((long)b.getProgress());scrubbing=false;}});
     }
 

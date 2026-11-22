@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <application android:name=".BeatBoxApp" android:theme="@style/Theme.BeatBox" android:label="BeatBox" android:allowBackup="true" android:supportsRtl="true">
         <activity android:name=".NowPlayingActivity" android:exported="false" />
+        <activity android:name=".LyricsActivity" android:exported="false" />
         <activity android:name=".QueueActivity" android:exported="false" />
         <activity android:name=".FavoritesActivity" android:exported="false" />
         <activity android:name=".PlaylistsActivity" android:exported="false" />
