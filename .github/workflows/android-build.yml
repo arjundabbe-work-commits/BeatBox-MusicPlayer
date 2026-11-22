@@ -37,8 +37,17 @@ jobs:
       - name: Set up Gradle and cache
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Run lint, unit tests, and build debug/release APKs
-        run: ./gradlew --no-daemon clean lintDebug testDebugUnitTest assembleDebug assembleRelease
+      - name: Clean build outputs
+        run: ./gradlew --no-daemon clean
+
+      - name: Run JVM unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Run Android lint
+        run: ./gradlew --no-daemon lintDebug
+
+      - name: Build debug and release APKs
+        run: ./gradlew --no-daemon assembleDebug assembleRelease
 
       - name: Summarize local test results
         if: always()
