@@ -28,8 +28,9 @@ public final class BeatBoxApp extends Application {
     private BeatBoxDatabase database;
     private static final String TIMER_PREFS = "beatbox_sleep_timer";
     private static final String TIMER_DEADLINE = "deadline_epoch_ms";
-    @UnstableApi
-    private final Runnable sleepTimerAction = this::pausePlaybackForSleepTimer;
+    private final Runnable sleepTimerAction = new Runnable() {
+        @Override @UnstableApi public void run() { pausePlaybackForSleepTimer(); }
+    };
 
     @Override public void onCreate() {
         super.onCreate();
