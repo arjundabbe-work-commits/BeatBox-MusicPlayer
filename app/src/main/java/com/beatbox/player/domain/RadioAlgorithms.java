@@ -1,6 +1,7 @@
 package com.beatbox.player.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -13,7 +14,7 @@ public final class RadioAlgorithms {
         station.add(seed);
         List<T> remaining = new ArrayList<>();
         for (T candidate : library) if (candidate.stableId() != seed.stableId()) remaining.add(candidate);
-        remaining.sort((left, right) -> {
+        Collections.sort(remaining, (left, right) -> {
             int comparison = Boolean.compare(!same(left.artist(), seed.artist()), !same(right.artist(), seed.artist()));
             if (comparison == 0) comparison = Boolean.compare(!same(left.album(), seed.album()), !same(right.album(), seed.album()));
             if (comparison == 0) comparison = safe(left.artist()).compareTo(safe(right.artist()));

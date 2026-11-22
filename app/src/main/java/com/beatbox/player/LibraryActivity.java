@@ -19,6 +19,7 @@ import androidx.media3.session.SessionToken;
 import com.beatbox.player.domain.MusicAlgorithms;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,7 +75,7 @@ public final class LibraryActivity extends AppCompatActivity {
                 case "Folders": groupSongs("Folders", song -> song.folder); break;
                 case "Recently added": {
                     List<Song> recent = new ArrayList<>(app.songs());
-                    recent.sort((left, right) -> {
+                    Collections.sort(recent, (left, right) -> {
                         int byDate = Long.compare(right.dateAddedSeconds, left.dateAddedSeconds);
                         return byDate != 0 ? byDate : left.title.toLowerCase(Locale.ROOT).compareTo(right.title.toLowerCase(Locale.ROOT));
                     });

@@ -1,6 +1,7 @@
 package com.beatbox.player.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -21,7 +22,7 @@ public final class MusicAlgorithms {
 
     public static <T extends TrackMetadata> List<T> sort(List<T> songs, Sort sort) {
         List<T> result = new ArrayList<>(songs);
-        result.sort((left, right) -> {
+        Collections.sort(result, (left, right) -> {
             int primary;
             switch (sort) {
                 case ARTIST: primary = left.artist().toLowerCase(Locale.ROOT).compareTo(right.artist().toLowerCase(Locale.ROOT)); break;
