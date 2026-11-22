@@ -11,12 +11,20 @@ public final class Song implements TrackMetadata {
     public final long duration;
     public final Uri uri;
     public final Uri artworkUri;
+    public final long dateAddedSeconds;
+    public final String folder;
 
     public Song(long id, String title, String artist, String album, long duration, Uri uri) {
         this(id,title,artist,album,duration,uri,null);
     }
     public Song(long id, String title, String artist, String album, long duration, Uri uri, Uri artworkUri) {
-        this.id = id; this.title = title; this.artist = artist; this.album = album; this.duration = duration; this.uri = uri; this.artworkUri=artworkUri;
+        this(id, title, artist, album, duration, uri, artworkUri, 0, "Unknown folder");
+    }
+    public Song(long id, String title, String artist, String album, long duration, Uri uri, Uri artworkUri,
+                long dateAddedSeconds, String folder) {
+        this.id = id; this.title = title; this.artist = artist; this.album = album; this.duration = duration;
+        this.uri = uri; this.artworkUri = artworkUri; this.dateAddedSeconds = dateAddedSeconds;
+        this.folder = folder == null || folder.isEmpty() ? "Unknown folder" : folder;
     }
     @Override public String title() { return title; }
     @Override public String artist() { return artist; }

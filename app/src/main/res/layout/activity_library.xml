@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@drawable/splash_gradient" android:padding="18dp">
+    <Button android:id="@+id/library_back" android:layout_width="wrap_content" android:layout_height="48dp" android:text="‹  Back" />
+    <TextView android:id="@+id/library_heading" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Your Library" android:textColor="#FFFFFF" android:textSize="24sp" android:textStyle="bold" android:paddingVertical="12dp" />
+    <TextView android:id="@+id/library_message" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textColor="#DDDDDD" android:paddingBottom="8dp" />
+    <ListView android:id="@+id/library_items" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:divider="#44777777" android:dividerHeight="1dp" />
+</LinearLayout>

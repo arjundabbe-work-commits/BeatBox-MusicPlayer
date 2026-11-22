@@ -58,6 +58,7 @@ public class HomeActivity extends AppCompatActivity {
         list = findViewById(R.id.song_list); status = findViewById(R.id.library_status);
         miniTitle = findViewById(R.id.mini_title); miniPlay = findViewById(R.id.mini_play);
         findViewById(R.id.search_button).setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
+        findViewById(R.id.library_button).setOnClickListener(v -> startActivity(new Intent(this, LibraryActivity.class)));
         findViewById(R.id.favorites_button).setOnClickListener(v -> startActivity(new Intent(this, FavoritesActivity.class)));
         findViewById(R.id.playlists_button).setOnClickListener(v -> startActivity(new Intent(this, PlaylistsActivity.class)));
         findViewById(R.id.recent_button).setOnClickListener(v -> startActivity(new Intent(this, RecentActivity.class)));
@@ -92,12 +93,15 @@ public class HomeActivity extends AppCompatActivity {
         io.execute(() -> {
             List<Song> found = new ArrayList<>();
             Uri collection = Build.VERSION.SDK_INT >= 29 ? MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL) : MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            String[] projection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.ALBUM_ID};
+            String folderColumn = Build.VERSION.SDK_INT >= 29 ? MediaStore.Audio.Media.RELATIVE_PATH : MediaStore.Audio.Media.DATA;
+            String[] projection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.DATE_ADDED, folderColumn};
             try (Cursor c = getContentResolver().query(collection, projection, MediaStore.Audio.Media.IS_MUSIC + "!=0", null, MediaStore.Audio.Media.TITLE + " COLLATE NOCASE ASC")) {
                 if (c != null) while (c.moveToNext()) {
                     long id = c.getLong(0); String title = c.getString(1); String artist = c.getString(2); String album = c.getString(3);
                     long albumId=c.getLong(5); Uri artwork=albumId<0?null:Uri.withAppendedPath(Uri.parse("content://media/external/audio/albumart"),Long.toString(albumId));
-                    found.add(new Song(id, title == null ? "Unknown title" : title, artist == null ? "Unknown artist" : artist, album == null ? "Unknown album" : album, c.getLong(4), Uri.withAppendedPath(collection, Long.toString(id)),artwork));
+                    String location = c.getString(7);
+                    String folder = Build.VERSION.SDK_INT >= 29 ? trimFolder(location) : parentFolder(location);
+                    found.add(new Song(id, title == null ? "Unknown title" : title, artist == null ? "Unknown artist" : artist, album == null ? "Unknown album" : album, c.getLong(4), Uri.withAppendedPath(collection, Long.toString(id)),artwork,c.getLong(6),folder));
                 }
             } catch (SecurityException error) {
                 runOnUiThread(() -> { if (!isDestroyed()) status.setText("Music access was removed. Grant permission to scan your library."); });
@@ -110,6 +114,17 @@ public class HomeActivity extends AppCompatActivity {
             String sort=app.database().settings().get("song_sort");
             runOnUiThread(() -> { if (!isDestroyed()) showSongs(found,sort); });
         });
+    }
+    private static String trimFolder(String path) {
+        if (path == null || path.trim().isEmpty()) return "Unknown folder";
+        String normalized = path.replace('\\', '/');
+        while (normalized.endsWith("/")) normalized = normalized.substring(0, normalized.length() - 1);
+        return normalized.isEmpty() ? "Unknown folder" : normalized;
+    }
+    private static String parentFolder(String path) {
+        if (path == null || path.trim().isEmpty()) return "Unknown folder";
+        int separator = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+        return separator <= 0 ? "Unknown folder" : path.substring(0, separator);
     }
     private void showSongs(List<Song> found,String persistedSort) {
         String sort=persistedSort==null?getSharedPreferences("beatbox_settings",MODE_PRIVATE).getString("song_sort","TITLE"):persistedSort;
