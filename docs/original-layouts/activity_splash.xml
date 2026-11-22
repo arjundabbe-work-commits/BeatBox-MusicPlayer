@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/splash_gradient"
+    android:padding="24dp">
+
+    <!-- Ha layout sagla content bottom la thevtoy -->
+    <LinearLayout
+        android:id="@+id/bottom_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="130dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Music cha icon -->
+        <ImageView
+            android:id="@+id/splash_logo"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:src="@drawable/baseline_music_note_24"
+            app:tint="#FFFFFF"
+            android:scaleType="fitCenter"
+            android:contentDescription="App Logo"
+            android:elevation="12dp" />
+
+        <!-- App cha nav -->
+        <TextView
+            android:id="@+id/splash_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="BeatBox"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"
+            android:fontFamily="sans-serif-black" />
+
+        <!-- Tagline -->
+        <TextView
+            android:id="@+id/splash_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Feel the Rhythm"
+            android:textColor="#DDDDDD"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:fontFamily="sans-serif-light"
+            android:shadowColor="#55000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="1.5" />
+    </LinearLayout>
+
+    <!-- Developer credit -->
+    <TextView
+        android:id="@+id/powered_by"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="Powered by Arjun Dabbe"
+        android:textColor="#888888"
+        android:textSize="10.5sp"
+        android:fontFamily="sans-serif-thin" />
+</RelativeLayout>

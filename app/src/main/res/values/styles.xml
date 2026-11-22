@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.BeatBox" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#1DB954</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#24130E</item>
+        <item name="android:navigationBarColor">#160D0A</item>
+        <item name="android:windowBackground">#160D0A</item>
+    </style>
+</resources>
