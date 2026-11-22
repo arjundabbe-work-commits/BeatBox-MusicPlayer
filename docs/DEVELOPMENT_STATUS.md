@@ -30,25 +30,17 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 
 ## Automated validation
 
-- Project-authored JVM test class: `MusicAlgorithmsTest` (search, sorting, duration formatting).
-- Android instrumentation tests: `BeatBoxDatabaseTest` (Room behavior) and `PlaybackEngineTest` (generated local WAV playback controls).
-- `BeatBoxUiTest` exercises album-category navigation, unmatched local search, sleep timer set/cancel, and the no-track lyrics state.
-- `PlaybackServiceTest` checks MediaController connection and session commands on the API 35 emulator.
-- GitHub Actions run #5, commit `e44a1fd`: JVM test step failed and the emulator job also failed; detailed logs were unavailable.
-- GitHub Actions run #6, commit `72c1a6a`: the JVM test step passed, Android lint failed, and APK build steps were skipped. The three authored JVM algorithm tests therefore passed on this run; no lint report was uploaded.
-- CI diagnostics from run #9 identified a Java compile error in the favourites long-press lambda (`FavoritesActivity` lacked `return true`). Fixed in commit `e7536cc`'s successor; verification is pending in the next run.
-- The next CI run identified Room's required `@NonNull` annotations on three String primary keys (`favorites.mediaId`, `play_history.mediaId`, `settings.settingKey`). Added in this change; rerun required.
-- The following run reported the missing `TreeMap` import in `LibraryActivity`'s genre query; restored in this change.
-- API 35 emulator instrumentation job for run #6 was still running at the time of this report; do not treat it as passed until its final result is recorded.
-- A later workflow run (#7, commit `3ac5bc9`) failed during the JVM test step before lint/build; this is intermittent relative to run #6, which passed the same test classes. The next workflow emits the failing Gradle output as a check annotation.
-- The Actions logs REST endpoint returns HTTP 403 (`Must have admin rights to Repository`) in this environment, so the failing step's console output could not be retrieved.
-- Local Gradle reproduction could not reach test execution because this workstation has no Android SDK configured (`ANDROID_HOME`/`sdk.dir` missing).
-- Lint, debug/release APK build, emulator tests, and physical-device tests are not verified on this commit.
+- JVM test sources cover music search/sorting, library grouping, radio ordering, LRC parsing, sleep timer arithmetic, database persistence, and playback controls.
+- Android instrumentation sources cover Room behavior, generated local WAV playback, MediaController connection, album-category navigation, sleep timer set/cancel, unmatched search, and the empty lyrics state.
+- GitHub Actions run [#32](https://github.com/arjundabbe-work-commits/BeatBox-MusicPlayer/actions/runs/45033694656), commit `c1a4c89`, completed its **Build, lint and unit tests** job successfully. The job ran clean, JVM unit tests, Android lint, and `assembleDebug assembleRelease`; it uploaded the 6.75 MB debug APK artifact. This is the latest verified build result, and it predates the current workflow runner-label change.
+- Run #32's emulator job could not start because `macos-14` resolved to the retired ARM image, which `android-emulator-runner` does not support. Earlier Linux emulator attempts also timed out while waiting for emulator boot. The workflow now uses `macos-15-intel` with an API 35 x86_64 emulator; the run for the current branch head is pending.
+- No physical Galaxy A35 test has been performed. The local workstation has no configured Android SDK, so build validation runs on GitHub Actions.
+- GitHub Actions reports a non-failing notice that Gradle 8.13 is out of date; no upgrade has been made during this stabilization pass.
 
 ## Remaining work
 
-1. Diagnose and fix the `lintDebug` failure. The latest workflow now emits the Gradle error tail as a GitHub check annotation so the cause is visible without downloading the artifact.
-2. Obtain green debug/release builds and API 35 instrumentation results.
-3. Implement the missing library categories and requested audio/user features, with matching tests.
-4. Run the Samsung Galaxy A35 checklist in `DEVICE_TESTING.md`; no physical device test is claimed here.
+1. Confirm the API 35 emulator job on the current `macos-15-intel` runner and fix any instrumentation failures.
+2. Install the generated debug APK on a device and complete the checklist in `DEVICE_TESTING.md`.
+3. Implement history-based recommendations, artist/genre-seeded radio, and the missing audio effects (crossfade, equalizer, and related playback controls), each with focused tests.
+4. Improve search into categorized results and restore the original runtime visual identity beyond the preserved XML references.
 5. Publish a final completion matrix only after each applicable item is implemented and verified.
