@@ -9,8 +9,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.UnstableApi;
 import java.util.Locale;
 
+@UnstableApi
 public final class SettingsActivity extends AppCompatActivity {
     private BeatBoxApp app;
     private TextView timerStatus;
@@ -32,6 +34,7 @@ public final class SettingsActivity extends AppCompatActivity {
         app = (BeatBoxApp) getApplication();
         timerStatus = findViewById(R.id.sleep_timer_status);
         findViewById(R.id.sort_order).setOnClickListener(v -> chooseSort());
+        findViewById(R.id.open_equalizer).setOnClickListener(v -> startActivity(new android.content.Intent(this, EqualizerActivity.class)));
         findViewById(R.id.sleep_timer).setOnClickListener(v -> chooseSleepTimer());
         findViewById(R.id.clear_history).setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setMessage("Clear recently played history?")

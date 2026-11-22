@@ -166,11 +166,6 @@ jobs:
       - name: Set up Gradle and cache
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Wake and unlock emulator display
-        run: |
-          adb shell input keyevent KEYCODE_WAKEUP
-          adb shell wm dismiss-keyguard
-
       - name: Run instrumented tests on API 35 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -179,7 +174,11 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: set -o pipefail; ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace 2>&1 | tee gradle-connected-tests.log
+          script: |
+            adb shell input keyevent KEYCODE_WAKEUP
+            adb shell wm dismiss-keyguard
+            set -o pipefail
+            ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace 2>&1 | tee gradle-connected-tests.log
 
       - name: Surface emulator failure details
         if: failure()

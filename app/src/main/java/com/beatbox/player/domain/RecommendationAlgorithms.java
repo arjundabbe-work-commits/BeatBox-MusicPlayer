@@ -61,8 +61,8 @@ public final class RecommendationAlgorithms {
         if (favorites != null && favorites.contains(track.stableId())) value += 100;
         ListeningSignal own = history == null ? null : history.get(track.stableId());
         if (own != null) value += preferenceWeight(own, nowMs) - Math.min(60, own.skips * 20);
-        value += Math.min(80, artists.getOrDefault(safe(track.artist()), 0));
-        value += Math.min(60, albums.getOrDefault(safe(track.album()), 0));
+        value += Math.min(80, valueFor(artists, safe(track.artist())));
+        value += Math.min(60, valueFor(albums, safe(track.album())));
         return value;
     }
 
@@ -75,7 +75,12 @@ public final class RecommendationAlgorithms {
 
     private static void addAffinity(Map<String, Integer> scores, String raw, int weight) {
         String key = safe(raw);
-        if (!key.isEmpty() && !key.startsWith("unknown")) scores.put(key, scores.getOrDefault(key, 0) + weight);
+        if (!key.isEmpty() && !key.startsWith("unknown")) scores.put(key, valueFor(scores, key) + weight);
+    }
+
+    private static int valueFor(Map<String, Integer> scores, String key) {
+        Integer value = scores.get(key);
+        return value == null ? 0 : value;
     }
 
     private static String safe(String value) { return value == null ? "" : value.trim().toLowerCase(Locale.ROOT); }

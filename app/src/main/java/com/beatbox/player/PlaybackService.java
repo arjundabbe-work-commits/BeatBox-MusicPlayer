@@ -19,6 +19,7 @@ public final class PlaybackService extends MediaSessionService {
     private ExoPlayer player;
     private MediaSession session;
     private BeatBoxApp app;
+    private AudioEffectsManager audioEffects;
     private String historyRecordedFor;
     private final Player.Listener persistenceListener = new Player.Listener() {
         @Override public void onTimelineChanged(androidx.media3.common.Timeline timeline, int reason) { persistQueue(); }
@@ -33,11 +34,13 @@ public final class PlaybackService extends MediaSessionService {
         player.setAudioAttributes(new AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MUSIC).build(), true);
         player.setHandleAudioBecomingNoisy(true);
         player.addListener(persistenceListener);
+        audioEffects = new AudioEffectsManager(this, player);
         session = new MediaSession.Builder(this, player).build();
         restoreQueue();
     }
     @Nullable @Override public MediaSession onGetSession(MediaSession.ControllerInfo controllerInfo) { return session; }
     @Override public void onDestroy() {
+        if (audioEffects != null) { audioEffects.release(); audioEffects = null; }
         if (session != null) { session.release(); session = null; }
         if (player != null) { player.removeListener(persistenceListener); player.release(); player = null; }
         super.onDestroy();

@@ -146,7 +146,9 @@ public final class LibraryActivity extends AppCompatActivity {
                             Song song = byId.get(rows.getLong(0));
                             if (song != null) {
                                 members.add(song);
-                                genresBySong.computeIfAbsent(song.id, ignored -> new HashSet<>()).add(name);
+                                Set<String> songGenres = genresBySong.get(song.id);
+                                if (songGenres == null) { songGenres = new HashSet<>(); genresBySong.put(song.id, songGenres); }
+                                songGenres.add(name);
                             }
                         }
                     }

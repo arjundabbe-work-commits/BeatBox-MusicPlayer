@@ -75,6 +75,10 @@ public class BeatBoxDatabaseTest {
         List<PlaylistTrackEntity> remaining=database.playlists().getTracks(id);
         assertEquals(1,remaining.size());assertEquals(second,remaining.get(0).entryId);assertEquals(0,remaining.get(0).position);
         database.settings().set("sort","ARTIST");assertEquals("ARTIST",database.settings().get("sort"));
+        database.settings().set("audio_effect_preset","Rock");
+        database.settings().set("audio_effect_band_0","55");
+        assertEquals("Rock",database.settings().get("audio_effect_preset"));
+        assertEquals("55",database.settings().get("audio_effect_band_0"));
         database.history().clear();assertTrue(database.history().recent(10).isEmpty());
     }
 }

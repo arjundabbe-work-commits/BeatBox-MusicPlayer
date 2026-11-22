@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/splash_gradient">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Audio effects" android:textColor="#FFFFFF" android:textSize="26sp"
+            android:textStyle="bold" android:paddingBottom="8dp" />
+        <TextView android:id="@+id/effect_status" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:textColor="#DDFFFFFF" android:paddingBottom="12dp" />
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/equalizer_enabled"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Equalizer" />
+        <Spinner android:id="@+id/equalizer_preset" android:layout_width="match_parent"
+            android:layout_height="48dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Five-band tone curve · scaled to available device bands"
+            android:textColor="#DDFFFFFF" android:paddingVertical="8dp" />
+        <LinearLayout android:id="@+id/equalizer_bands" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
+        <Button android:id="@+id/equalizer_reset" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="Reset defaults" />
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/bass_enabled"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Bass boost" />
+        <SeekBar android:id="@+id/bass_strength" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:max="1000" />
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/space_enabled"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Virtualizer / spatial effect" />
+        <SeekBar android:id="@+id/space_strength" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:max="1000" />
+    </LinearLayout>
+</ScrollView>

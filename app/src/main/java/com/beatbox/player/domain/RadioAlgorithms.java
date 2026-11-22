@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 
 public final class RadioAlgorithms {
     private RadioAlgorithms() { }
+    public interface CategoryReader<T> { String category(T track); }
 
     public static <T extends TrackMetadata> List<T> fromSeed(List<T> library, T seed, int limit) {
         List<T> station = new ArrayList<>();
@@ -40,19 +40,19 @@ public final class RadioAlgorithms {
 
     /** Genres come from MediaStore membership and are supplied without changing the track model. */
     public static <T extends TrackMetadata> List<T> fromGenre(List<T> library, String genre,
-            Function<? super T, String> genreForTrack, int limit) {
+            CategoryReader<? super T> genreForTrack, int limit) {
         return fromCategory(library, genre, genreForTrack, limit);
     }
 
     private static <T extends TrackMetadata> List<T> fromCategory(List<T> library, String label,
-            Function<? super T, String> categoryForTrack, int limit) {
+            CategoryReader<? super T> categoryForTrack, int limit) {
         List<T> station = new ArrayList<>();
         if (library == null || label == null || label.trim().isEmpty() || categoryForTrack == null || limit <= 0) return station;
         List<T> candidates = new ArrayList<>();
         for (T track : library) if (track != null && !containsId(candidates, track.stableId())) candidates.add(track);
         final String key = safe(label);
         Collections.sort(candidates, (left, right) -> {
-            int byMatch = Boolean.compare(!same(categoryForTrack.apply(left), key), !same(categoryForTrack.apply(right), key));
+            int byMatch = Boolean.compare(!same(categoryForTrack.category(left), key), !same(categoryForTrack.category(right), key));
             if (byMatch != 0) return byMatch;
             int byArtist = safe(left.artist()).compareTo(safe(right.artist()));
             if (byArtist != 0) return byArtist;
