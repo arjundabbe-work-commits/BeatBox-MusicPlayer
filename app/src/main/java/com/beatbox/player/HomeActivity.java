@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +44,14 @@ public class HomeActivity extends AppCompatActivity {
     TextView status, miniTitle;
     ImageButton miniPlay;
     private boolean permissionDenied;
+    private boolean homeWasStarted;
+    private boolean mediaObserverRegistered;
+    private final Handler libraryHandler = new Handler(Looper.getMainLooper());
+    private final Runnable refreshAfterMediaChange = () -> { if (hasAudioPermission()) scan(); };
+    private final ContentObserver mediaObserver = new ContentObserver(libraryHandler) {
+        @Override public void onChange(boolean selfChange) { scheduleMediaRefresh(); }
+        @Override public void onChange(boolean selfChange, Uri uri) { scheduleMediaRefresh(); }
+    };
     private final Player.Listener miniListener = new Player.Listener() {
         @Override public void onIsPlayingChanged(boolean playing) { refreshMini(); }
         @Override public void onMediaItemTransition(MediaItem item, int reason) { refreshMini(); }
@@ -115,6 +124,10 @@ public class HomeActivity extends AppCompatActivity {
             runOnUiThread(() -> { if (!isDestroyed()) showSongs(found,sort); });
         });
     }
+    private void scheduleMediaRefresh() {
+        libraryHandler.removeCallbacks(refreshAfterMediaChange);
+        libraryHandler.postDelayed(refreshAfterMediaChange, 600);
+    }
     private static String trimFolder(String path) {
         if (path == null || path.trim().isEmpty()) return "Unknown folder";
         String normalized = path.replace('\\', '/');
@@ -145,8 +158,21 @@ public class HomeActivity extends AppCompatActivity {
         if (controller != null) miniPlay.setImageResource(controller.isPlaying() ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
     }
     @Override protected void onDestroy() {
-        io.shutdown(); if (controller != null) controller.removeListener(miniListener);
+        libraryHandler.removeCallbacks(refreshAfterMediaChange); io.shutdown(); if (controller != null) controller.removeListener(miniListener);
         if (controllerFuture != null) MediaController.releaseFuture(controllerFuture); controller = null; super.onDestroy();
     }
     @Override protected void onResume(){super.onResume();if(permissionDenied&&hasAudioPermission()){permissionDenied=false;scan();}}
+    @Override protected void onStart(){
+        super.onStart();
+        Uri collection = Build.VERSION.SDK_INT >= 29 ? MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL) : MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        try { getContentResolver().registerContentObserver(collection, true, mediaObserver); mediaObserverRegistered=true; }
+        catch (SecurityException ignored) { mediaObserverRegistered=false; }
+        if(homeWasStarted&&hasAudioPermission()&&!permissionDenied)scan();
+        homeWasStarted=true;
+    }
+    @Override protected void onStop(){
+        if(mediaObserverRegistered){getContentResolver().unregisterContentObserver(mediaObserver);mediaObserverRegistered=false;}
+        libraryHandler.removeCallbacks(refreshAfterMediaChange);
+        super.onStop();
+    }
 }

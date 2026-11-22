@@ -5,6 +5,7 @@ BeatBox is a native Android Java music player for audio stored on the device. Th
 ## Implemented
 
 - MediaStore audio discovery with runtime permission handling and manual refresh.
+- Debounced MediaStore change observation while Home is visible, plus rescan when returning from another section.
 - Device-backed library browsing for songs, albums, artists, folders, genres, recently added, recently played, favourites, and playlists.
 - Local title, artist, and album search.
 - Media3 ExoPlayer playback in a `MediaSessionService`, shared through `MediaController`.

@@ -14,7 +14,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 
 | Area | Status |
 |---|---|
-| Local song discovery, permission flow, manual refresh | Implemented; device validation pending |
+| Local song discovery, permission flow, manual refresh, change observation | Implemented (observer on Home and rescan on return); device validation pending |
 | Local search (title, artist, album) | Implemented; unified categorized search results are absent |
 | Albums, artists, folders, genres, recently added library browsing | Implemented from MediaStore cache/genre membership; verification pending |
 | Media3 player, background service, media session, mini-player | Implemented; hosted emulator verification is in progress; physical device pending |
