@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@UnstableApi
 public final class BeatBoxApp extends Application {
     public interface LibraryListener { void onLibraryChanged(List<Song> songs); }
     public final ExecutorService io = Executors.newFixedThreadPool(2);
@@ -77,7 +78,6 @@ public final class BeatBoxApp extends Application {
         }
     }
 
-    @UnstableApi
     private void pausePlaybackForSleepTimer() {
         timerPreferences().edit().remove(TIMER_DEADLINE).apply();
         SessionToken token = new SessionToken(this, new ComponentName(this, PlaybackService.class));
