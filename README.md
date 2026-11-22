@@ -19,6 +19,7 @@ BeatBox is a native Android Java music player for audio stored on the device. Th
 - Song-based local radio queues related tracks using actual artist/album metadata, with no online catalogue.
 - JVM tests for local search/sort/time algorithms; Room and local-fixture playback instrumentation tests.
 - Espresso instrumentation flows for library navigation, local search, sleep timer, and the lyrics empty state.
+- MediaController connection coverage for the playback service session.
 - GitHub Actions for JVM tests, lint, debug/release APK builds, and API 35 emulator instrumentation.
 
 Online streaming, sign-in/cloud sync, lyrics, equalizer/audio effects, sleep timer, crossfade, video browsing, and a full albums/artists/folders/genres library are not implemented. The app does not claim access to an online catalogue.

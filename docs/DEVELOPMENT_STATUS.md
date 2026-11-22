@@ -33,6 +33,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 - Project-authored JVM test class: `MusicAlgorithmsTest` (search, sorting, duration formatting).
 - Android instrumentation tests: `BeatBoxDatabaseTest` (Room behavior) and `PlaybackEngineTest` (generated local WAV playback controls).
 - `BeatBoxUiTest` exercises album-category navigation, unmatched local search, sleep timer set/cancel, and the no-track lyrics state.
+- `PlaybackServiceTest` checks MediaController connection and session commands on the API 35 emulator.
 - GitHub Actions run #5, commit `e44a1fd`: JVM test step failed and the emulator job also failed; detailed logs were unavailable.
 - GitHub Actions run #6, commit `72c1a6a`: the JVM test step passed, Android lint failed, and APK build steps were skipped. The three authored JVM algorithm tests therefore passed on this run; no lint report was uploaded.
 - CI diagnostics from run #9 identified a Java compile error in the favourites long-press lambda (`FavoritesActivity` lacked `return true`). Fixed in commit `e7536cc`'s successor; verification is pending in the next run.
