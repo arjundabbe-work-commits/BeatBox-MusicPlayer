@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.session.MediaController;
@@ -15,6 +16,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 
+@UnstableApi
 public final class RecentActivity extends AppCompatActivity {
     private BeatBoxApp app;private final List<Song> songs=new ArrayList<>();private ArrayAdapter<Song> adapter;private MediaController controller;private ListenableFuture<MediaController> future;
     @Override protected void onCreate(Bundle state){super.onCreate(state);setContentView(R.layout.activity_recent);app=(BeatBoxApp)getApplication();ListView list=findViewById(R.id.recent_list);adapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,songs);list.setAdapter(adapter);list.setOnItemClickListener((p,v,pos,id)->play(pos));}
