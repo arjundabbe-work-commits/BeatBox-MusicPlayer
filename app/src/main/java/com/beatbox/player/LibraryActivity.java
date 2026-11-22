@@ -9,6 +9,8 @@ import android.provider.MediaStore;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.view.View;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
@@ -28,6 +30,7 @@ public final class LibraryActivity extends AppCompatActivity {
     private BeatBoxApp app;
     private ListView itemsView;
     private TextView heading, message;
+    private View trackActions;
     private String page = "categories";
     private final List<Song> tracks = new ArrayList<>();
     private final List<String> groupKeys = new ArrayList<>();
@@ -42,13 +45,18 @@ public final class LibraryActivity extends AppCompatActivity {
         itemsView = findViewById(R.id.library_items);
         heading = findViewById(R.id.library_heading);
         message = findViewById(R.id.library_message);
+        trackActions = findViewById(R.id.library_track_actions);
         findViewById(R.id.library_back).setOnClickListener(v -> navigateBack());
+        findViewById(R.id.library_play_all).setOnClickListener(v -> playWholeList(false));
+        findViewById(R.id.library_shuffle).setOnClickListener(v -> playWholeList(true));
+        findViewById(R.id.library_add_queue).setOnClickListener(v -> addListToQueue());
         itemsView.setOnItemClickListener((parent, view, position, id) -> onItemSelected(position));
         showCategories();
     }
 
     private void showCategories() {
         page = "categories";
+        trackActions.setVisibility(View.GONE);
         groups.clear();
         groupKeys.clear();
         heading.setText("Your Library");
@@ -91,6 +99,7 @@ public final class LibraryActivity extends AppCompatActivity {
         groupKeys.clear();
         groupKeys.addAll(groups.keySet());
         page = "groups";
+        trackActions.setVisibility(View.GONE);
         heading.setText(title);
         message.setText(groupKeys.isEmpty() ? "No " + title.toLowerCase(Locale.ROOT) + " found" : Integer.toString(groupKeys.size()) + " " + title.toLowerCase(Locale.ROOT));
         List<String> rows = new ArrayList<>();
@@ -100,6 +109,7 @@ public final class LibraryActivity extends AppCompatActivity {
 
     private void loadGenres() {
         page = "loading";
+        trackActions.setVisibility(View.GONE);
         heading.setText("Genres");
         message.setText("Loading genre tags from MediaStore…");
         itemsView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[0]));
@@ -125,7 +135,7 @@ public final class LibraryActivity extends AppCompatActivity {
                 }
             } catch (SecurityException | IllegalArgumentException ignored) { }
             runOnUiThread(() -> {
-                if (isFinishing() || isDestroyed()) return;
+                if (isFinishing() || isDestroyed() || !page.equals("loading")) return;
                 groups.clear(); groups.putAll(found); groupKeys.clear(); groupKeys.addAll(groups.keySet()); page = "groups";
                 message.setText(groupKeys.isEmpty() ? "No genre metadata is available for these songs." : groupKeys.size() + " genres");
                 List<String> rows = new ArrayList<>();
@@ -139,6 +149,7 @@ public final class LibraryActivity extends AppCompatActivity {
         tracks.clear();
         if (songs != null) tracks.addAll(songs);
         page = "tracks";
+        trackActions.setVisibility(View.VISIBLE);
         heading.setText(title);
         message.setText(tracks.isEmpty() ? "No songs found" : tracks.size() + " tracks · Tap a song to play this list");
         List<String> rows = new ArrayList<>();
@@ -148,13 +159,39 @@ public final class LibraryActivity extends AppCompatActivity {
 
     private void playTracks(int selected) {
         if (controller == null || selected < 0 || selected >= tracks.size()) return;
+        List<MediaItem> queue = mediaItems();
+        controller.setMediaItems(queue, selected, 0);
+        controller.prepare();
+        controller.play();
+    }
+
+    private List<MediaItem> mediaItems() {
         List<MediaItem> queue = new ArrayList<>();
         for (Song song : tracks) queue.add(new MediaItem.Builder().setMediaId(Long.toString(song.id)).setUri(song.uri)
                 .setMediaMetadata(new MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
                         .setAlbumTitle(song.album).setArtworkUri(song.artworkUri).build()).build());
-        controller.setMediaItems(queue, selected, 0);
+        return queue;
+    }
+
+    private void playWholeList(boolean shuffle) {
+        if (tracks.isEmpty()) return;
+        if (controller == null) { Toast.makeText(this, "Playback is connecting.", Toast.LENGTH_SHORT).show(); return; }
+        controller.setMediaItems(mediaItems());
+        controller.setShuffleModeEnabled(shuffle);
         controller.prepare();
         controller.play();
+    }
+
+    private void addListToQueue() {
+        if (tracks.isEmpty()) return;
+        if (controller == null) { Toast.makeText(this, "Playback is connecting.", Toast.LENGTH_SHORT).show(); return; }
+        List<MediaItem> items = mediaItems();
+        if (controller.getMediaItemCount() == 0) {
+            controller.setMediaItems(items);
+            controller.prepare();
+            controller.play();
+        } else controller.addMediaItems(items);
+        Toast.makeText(this, "Added " + items.size() + " tracks to the queue.", Toast.LENGTH_SHORT).show();
     }
 
     private void navigateBack() {
@@ -162,6 +199,7 @@ public final class LibraryActivity extends AppCompatActivity {
             if (groups.isEmpty()) showCategories();
             else {
                 page = "groups";
+                trackActions.setVisibility(View.GONE);
                 heading.setText("Choose a collection");
                 List<String> rows = new ArrayList<>();
                 for (String key : groupKeys) rows.add(key + "\n" + groups.get(key).size() + " tracks");

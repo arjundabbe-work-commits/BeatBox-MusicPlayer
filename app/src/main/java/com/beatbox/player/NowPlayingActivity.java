@@ -20,6 +20,7 @@ import androidx.media3.session.SessionToken;
 import com.beatbox.player.data.FavoriteEntity;
 import com.beatbox.player.data.TrackRecord;
 import com.beatbox.player.domain.MusicAlgorithms;
+import com.beatbox.player.domain.RadioAlgorithms;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
@@ -70,6 +71,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
         favorite.setOnClickListener(v->toggleFavorite());
         findViewById(R.id.open_queue).setOnClickListener(v->startActivity(new android.content.Intent(this,QueueActivity.class)));
         findViewById(R.id.open_lyrics).setOnClickListener(v->startActivity(new android.content.Intent(this,LyricsActivity.class)));
+        findViewById(R.id.start_radio).setOnClickListener(v->startLocalRadio());
         progress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int value,boolean fromUser){}public void onStartTrackingTouch(SeekBar b){scrubbing=true;}public void onStopTrackingTouch(SeekBar b){if(player()!=null)player().seekTo((long)b.getProgress());scrubbing=false;}});
     }
 
@@ -99,6 +101,18 @@ public final class NowPlayingActivity extends AppCompatActivity {
         MediaMetadata m=item.mediaMetadata;String id=item.mediaId;
         TrackRecord record=new TrackRecord(id,item.localConfiguration.uri.toString(),m.title==null?id:m.title.toString(),m.artist==null?"Unknown artist":m.artist.toString(),m.albumTitle==null?"Unknown album":m.albumTitle.toString(),p.getDuration(),m.artworkUri==null?null:m.artworkUri.toString());
         app.io.execute(()->{boolean saved=app.database().favorites().toggle(new FavoriteEntity(record,System.currentTimeMillis()));runOnUiThread(()->favorite.setImageResource(saved?android.R.drawable.btn_star_big_on:android.R.drawable.btn_star_big_off));});
+    }
+    private void startLocalRadio(){
+        MediaController p=player();MediaItem current=p==null?null:p.getCurrentMediaItem();
+        if(current==null){android.widget.Toast.makeText(this,"Play a local song to start radio.",android.widget.Toast.LENGTH_SHORT).show();return;}
+        Song seed=null;for(Song song:app.songs())if(Long.toString(song.id).equals(current.mediaId)){seed=song;break;}
+        if(seed==null){android.widget.Toast.makeText(this,"Refresh your library before starting radio.",android.widget.Toast.LENGTH_SHORT).show();return;}
+        java.util.List<Song> station=RadioAlgorithms.fromSeed(app.songs(),seed,30);
+        if(station.size()<2){android.widget.Toast.makeText(this,"Add more local music to build a radio queue.",android.widget.Toast.LENGTH_SHORT).show();return;}
+        java.util.ArrayList<MediaItem> queue=new java.util.ArrayList<>();
+        for(Song song:station)queue.add(new MediaItem.Builder().setMediaId(Long.toString(song.id)).setUri(song.uri).setMediaMetadata(new MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist).setAlbumTitle(song.album).setArtworkUri(song.artworkUri).build()).build());
+        p.setShuffleModeEnabled(false);p.setMediaItems(queue);p.setRepeatMode(Player.REPEAT_MODE_OFF);p.prepare();p.play();
+        android.widget.Toast.makeText(this,"Local radio started from " + seed.artist + ".",android.widget.Toast.LENGTH_SHORT).show();
     }
     private void refreshFavorite(MediaItem item){
         if(item==null)return;String id=item.mediaId;

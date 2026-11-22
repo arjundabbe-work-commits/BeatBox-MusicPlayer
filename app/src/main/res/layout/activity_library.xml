@@ -7,6 +7,12 @@
         android:text="Your Library" android:textColor="#FFFFFF" android:textSize="24sp" android:textStyle="bold" android:paddingVertical="12dp" />
     <TextView android:id="@+id/library_message" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:textColor="#DDDDDD" android:paddingBottom="8dp" />
+    <LinearLayout android:id="@+id/library_track_actions" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:visibility="gone">
+        <Button android:id="@+id/library_play_all" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Play all" />
+        <Button android:id="@+id/library_shuffle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Shuffle" />
+        <Button android:id="@+id/library_add_queue" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Add to queue" />
+    </LinearLayout>
     <ListView android:id="@+id/library_items" android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:divider="#44777777" android:dividerHeight="1dp" />
 </LinearLayout>
