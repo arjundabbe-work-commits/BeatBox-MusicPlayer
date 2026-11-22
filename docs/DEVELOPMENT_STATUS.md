@@ -29,16 +29,17 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 
 - Project-authored JVM test class: `MusicAlgorithmsTest` (search, sorting, duration formatting).
 - Android instrumentation tests: `BeatBoxDatabaseTest` (Room behavior) and `PlaybackEngineTest` (generated local WAV playback controls).
-- GitHub Actions run #5, commit `e44a1fd`: **JVM unit test step failed**. Lint and APK build steps were skipped because the workflow stops after a failed required step. No test XML or report artifact was produced, so the failure details are not available in the uploaded artifacts.
-- API 35 emulator instrumentation job for run #5 was still running at the time of this report; do not treat it as passed until its final result is recorded.
+- GitHub Actions run #5, commit `e44a1fd`: JVM test step failed and the emulator job also failed; detailed logs were unavailable.
+- GitHub Actions run #6, commit `72c1a6a`: the JVM test step passed, Android lint failed, and APK build steps were skipped. The three authored JVM algorithm tests therefore passed on this run; no lint report was uploaded.
+- API 35 emulator instrumentation job for run #6 was still running at the time of this report; do not treat it as passed until its final result is recorded.
 - The Actions logs REST endpoint returns HTTP 403 (`Must have admin rights to Repository`) in this environment, so the failing step's console output could not be retrieved.
 - Local Gradle reproduction could not reach test execution because this workstation has no Android SDK configured (`ANDROID_HOME`/`sdk.dir` missing).
 - Lint, debug/release APK build, emulator tests, and physical-device tests are not verified on this commit.
 
 ## Remaining work
 
-1. Diagnose and fix CI's `testDebugUnitTest` failure using a run with visible detailed Gradle output or a locally configured Android SDK.
-2. Obtain green lint, debug/release builds, and API 35 instrumentation results.
+1. Diagnose and fix the `lintDebug` failure. The latest workflow now emits the Gradle error tail as a GitHub check annotation so the cause is visible without downloading the artifact.
+2. Obtain green debug/release builds and API 35 instrumentation results.
 3. Implement the missing library categories and requested audio/user features, with matching tests.
 4. Run the Samsung Galaxy A35 checklist in `DEVICE_TESTING.md`; no physical device test is claimed here.
 5. Publish a final completion matrix only after each applicable item is implemented and verified.

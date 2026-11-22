@@ -41,10 +41,23 @@ jobs:
         run: ./gradlew --no-daemon clean
 
       - name: Run JVM unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest --stacktrace 2>&1 | tee gradle-test-debug.log
+        run: set -o pipefail; ./gradlew --no-daemon testDebugUnitTest --stacktrace 2>&1 | tee gradle-test-debug.log
 
       - name: Run Android lint
-        run: ./gradlew --no-daemon lintDebug
+        run: set -o pipefail; ./gradlew --no-daemon lintDebug --stacktrace 2>&1 | tee gradle-lint.log
+
+      - name: Surface lint failure details
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('gradle-lint.log')
+          if path.exists():
+              lines = path.read_text(errors='replace').splitlines()
+              message = '\n'.join(lines[-45:])[-5000:]
+              escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print(f'::error title=Gradle lint diagnostics::{escaped}')
+          PY
 
       - name: Build debug and release APKs
         run: ./gradlew --no-daemon assembleDebug assembleRelease
@@ -76,6 +89,7 @@ jobs:
         with:
           name: beatbox-build-reports
           path: |
+            gradle-lint.log
             app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
             app/build/test-results/testDebugUnitTest/
@@ -87,7 +101,9 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: beatbox-gradle-diagnostics
-          path: gradle-test-debug.log
+          path: |
+            gradle-test-debug.log
+            gradle-lint.log
           if-no-files-found: warn
           retention-days: 7
 
@@ -129,7 +145,20 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: ./gradlew --no-daemon connectedDebugAndroidTest
+          script: set -o pipefail; ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace 2>&1 | tee gradle-connected-tests.log
+
+      - name: Surface emulator failure details
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('gradle-connected-tests.log')
+          if path.exists():
+              lines = path.read_text(errors='replace').splitlines()
+              message = '\n'.join(lines[-45:])[-5000:]
+              escaped = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print(f'::error title=Emulator test diagnostics::{escaped}')
+          PY
 
       - name: Upload emulator test reports
         if: always()
@@ -137,6 +166,7 @@ jobs:
         with:
           name: beatbox-emulator-test-reports
           path: |
+            gradle-connected-tests.log
             app/build/reports/androidTests/connected/
             app/build/outputs/androidTest-results/connected/
           if-no-files-found: warn
