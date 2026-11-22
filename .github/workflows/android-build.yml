@@ -186,22 +186,19 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 600
           pre-emulator-launch-script: |
-            printf 'Pre-launch diagnostics started at %s\n' "$(date -Is)" > emulator-boot-diagnostics.log
-            nohup setsid -f bash -c '
-              for attempt in $(seq 1 120); do
-                {
-                  printf "\n--- emulator boot probe %s ---\n" "$(date -Is)"
-                  timeout 8s adb devices -l || echo "ADB device listing timed out or failed"
-                  printf "boot_completed="
-                  timeout 8s adb -s emulator-5554 shell getprop sys.boot_completed 2>&1 || echo "boot-state query timed out or failed"
-                  printf "boot_animation="
-                  timeout 8s adb -s emulator-5554 shell getprop init.svc.bootanim 2>&1 || echo "boot-animation query timed out or failed"
-                } >> "$GITHUB_WORKSPACE/emulator-boot-diagnostics.log" 2>&1
-                sleep 5
-              done
-            ' >/dev/null 2>&1 </dev/null &
+            {
+              printf 'Pre-launch diagnostics started at %s\n' "$(date -Is)"
+              echo "ADB state before emulator launch:"
+              adb devices -l || true
+            } > emulator-boot-diagnostics.log 2>&1
           script: |
             set +e
+            {
+              echo "--- Emulator boot state before tests ---"
+              timeout 10s adb devices -l || echo "ADB device listing timed out or failed"
+              echo "boot_completed=$(timeout 10s adb -s emulator-5554 shell getprop sys.boot_completed 2>&1)"
+              echo "boot_animation=$(timeout 10s adb -s emulator-5554 shell getprop init.svc.bootanim 2>&1)"
+            } >> emulator-boot-diagnostics.log 2>&1
             timeout 10s adb shell input keyevent KEYCODE_WAKEUP || true
             timeout 10s adb shell wm dismiss-keyguard || true
             ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace > gradle-connected-tests.log 2>&1
