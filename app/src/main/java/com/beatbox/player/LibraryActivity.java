@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 @UnstableApi
 public final class LibraryActivity extends AppCompatActivity {
+    private static final String TAG = "LibraryActivity";
     private static final String[] CATEGORIES = {"All songs", "Albums", "Artists", "Folders", "Genres", "Recently added", "Recently played", "Favourites", "Playlists"};
     private BeatBoxApp app;
     private ListView itemsView;
@@ -57,7 +58,11 @@ public final class LibraryActivity extends AppCompatActivity {
         heading = findViewById(R.id.library_heading);
         message = findViewById(R.id.library_message);
         trackActions = findViewById(R.id.library_track_actions);
-        findViewById(R.id.library_back).setOnClickListener(v -> navigateBack());
+        findViewById(R.id.library_back).setOnClickListener(v -> {
+            android.util.Log.i(TAG, "Back button clicked at page=" + page);
+            navigateBack();
+            android.util.Log.i(TAG, "Back navigation finished at page=" + page + ", heading=" + heading.getText());
+        });
         findViewById(R.id.library_play_all).setOnClickListener(v -> playWholeList(false));
         findViewById(R.id.library_shuffle).setOnClickListener(v -> playWholeList(true));
         findViewById(R.id.library_radio).setOnClickListener(v -> startRadio());
