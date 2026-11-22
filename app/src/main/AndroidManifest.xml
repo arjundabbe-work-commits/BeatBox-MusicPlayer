@@ -3,8 +3,15 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <application android:theme="@style/Theme.BeatBox" android:label="BeatBox" android:allowBackup="true" android:supportsRtl="true">
+    <application android:name=".BeatBoxApp" android:theme="@style/Theme.BeatBox" android:label="BeatBox" android:allowBackup="true" android:supportsRtl="true">
         <activity android:name=".NowPlayingActivity" android:exported="false" />
+        <activity android:name=".QueueActivity" android:exported="false" />
+        <activity android:name=".FavoritesActivity" android:exported="false" />
+        <activity android:name=".PlaylistsActivity" android:exported="false" />
+        <activity android:name=".PlaylistDetailActivity" android:exported="false" />
+        <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".AboutUsActivity" android:exported="false" />
+        <activity android:name=".RecentActivity" android:exported="false" />
         <activity android:name=".SearchActivity" android:exported="false" />
         <activity android:name=".HomeActivity" android:exported="false" />
         <activity android:name=".SplashActivity" android:exported="true">

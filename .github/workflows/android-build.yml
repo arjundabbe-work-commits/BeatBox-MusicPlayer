@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and test debug app
+    name: Build, lint and unit tests
     runs-on: ubuntu-24.04
     steps:
       - name: Check out source
@@ -37,8 +37,41 @@ jobs:
       - name: Set up Gradle and cache
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Run unit tests and assemble debug APK
-        run: ./gradlew --no-daemon clean testDebugUnitTest assembleDebug
+      - name: Run lint, unit tests, and build debug/release APKs
+        run: ./gradlew --no-daemon clean lintDebug testDebugUnitTest assembleDebug assembleRelease
+
+      - name: Summarize local test results
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, xml.etree.ElementTree as ET
+          files = glob.glob('app/build/test-results/**/*.xml', recursive=True)
+          totals = {'tests': 0, 'failures': 0, 'errors': 0, 'skipped': 0}
+          for path in files:
+              try:
+                  root = ET.parse(path).getroot()
+                  for key in totals:
+                      totals[key] += int(root.attrib.get(key, 0))
+              except (ET.ParseError, OSError):
+                  pass
+          print('### JVM unit tests')
+          if not files:
+              print('No JVM test result XML was produced.')
+          else:
+              print(f"{totals['tests']} tests; {totals['failures']} failures; {totals['errors']} errors; {totals['skipped']} skipped.")
+          PY
+
+      - name: Upload build and lint reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: beatbox-build-reports
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/test-results/testDebugUnitTest/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v6
@@ -46,4 +79,47 @@ jobs:
           name: beatbox-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 14
+
+  emulator-tests:
+    name: Android emulator tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK and accept licences
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+
+      - name: Set up Gradle and cache
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Run instrumented tests on API 35 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: ./gradlew --no-daemon connectedDebugAndroidTest
+
+      - name: Upload emulator test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: beatbox-emulator-test-reports
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/connected/
+          if-no-files-found: warn
           retention-days: 14
