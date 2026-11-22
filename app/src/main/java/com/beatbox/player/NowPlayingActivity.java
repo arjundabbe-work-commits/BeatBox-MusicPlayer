@@ -11,9 +11,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.session.MediaController;
 import androidx.media3.session.SessionToken;
@@ -36,6 +38,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
     private TextView title, artist, album, currentTime, totalTime;
     private ImageView cover;
     private ImageButton toggle, shuffle, repeat, favorite;
+    private Button speedButton;
     private SeekBar progress;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService artworkExecutor = Executors.newSingleThreadExecutor();
@@ -55,6 +58,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
         @Override public void onIsPlayingChanged(boolean playing){refreshControls();}
         @Override public void onShuffleModeEnabledChanged(boolean enabled){refreshControls();}
         @Override public void onRepeatModeChanged(int mode){refreshControls();}
+        @Override public void onPlaybackParametersChanged(PlaybackParameters parameters){refreshControls();}
         @Override public void onPlaybackStateChanged(int state){refresh();}
     };
 
@@ -63,6 +67,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
         title=findViewById(R.id.song_title);artist=findViewById(R.id.song_artist);album=findViewById(R.id.song_album);cover=findViewById(R.id.cover);
         currentTime=findViewById(R.id.current_time);totalTime=findViewById(R.id.total_time);progress=findViewById(R.id.progress);
         toggle=findViewById(R.id.play_pause);shuffle=findViewById(R.id.shuffle);repeat=findViewById(R.id.repeat);favorite=findViewById(R.id.favorite);
+        speedButton=findViewById(R.id.playback_speed);
         findViewById(R.id.previous).setOnClickListener(v->{if(player()!=null)player().seekToPreviousMediaItem();});
         findViewById(R.id.next).setOnClickListener(v->{if(player()!=null)player().seekToNextMediaItem();});
         toggle.setOnClickListener(v->{if(player()!=null){if(player().isPlaying())player().pause();else player().play();refreshControls();}});
@@ -72,6 +77,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
         findViewById(R.id.open_queue).setOnClickListener(v->startActivity(new android.content.Intent(this,QueueActivity.class)));
         findViewById(R.id.open_lyrics).setOnClickListener(v->startActivity(new android.content.Intent(this,LyricsActivity.class)));
         findViewById(R.id.start_radio).setOnClickListener(v->startLocalRadio());
+        speedButton.setOnClickListener(v->choosePlaybackSpeed());
         progress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int value,boolean fromUser){}public void onStartTrackingTouch(SeekBar b){scrubbing=true;}public void onStopTrackingTouch(SeekBar b){if(player()!=null)player().seekTo((long)b.getProgress());scrubbing=false;}});
     }
 
@@ -94,6 +100,20 @@ public final class NowPlayingActivity extends AppCompatActivity {
         shuffle.setAlpha(p.getShuffleModeEnabled()?1f:0.55f);
         int repeatMode=p.getRepeatMode();repeat.setAlpha(repeatMode==Player.REPEAT_MODE_OFF?0.55f:1f);
         repeat.setContentDescription(repeatMode==Player.REPEAT_MODE_ONE?"Repeat one":repeatMode==Player.REPEAT_MODE_ALL?"Repeat all":"Repeat off");
+        speedButton.setText(String.format(java.util.Locale.ROOT,"Speed %.2g×",p.getPlaybackParameters().speed));
+    }
+    private void choosePlaybackSpeed(){
+        MediaController p=player();if(p==null)return;
+        float[] speeds={0.75f,1f,1.25f,1.5f,1.75f,2f};
+        String[] labels={"0.75×","1.0×","1.25×","1.5×","1.75×","2.0×"};
+        int selected=1;for(int i=0;i<speeds.length;i++)if(Math.abs(p.getPlaybackParameters().speed-speeds[i])<0.02f)selected=i;
+        new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Playback speed").setSingleChoiceItems(labels,selected,(dialog,which)->{
+            float speed=speeds[which];MediaController current=player();
+            if(current!=null)current.setPlaybackParameters(new PlaybackParameters(speed));
+            getSharedPreferences("beatbox_settings",MODE_PRIVATE).edit().putFloat("playback_speed",speed).apply();
+            app.io.execute(()->app.database().settings().set("playback_speed",Float.toString(speed)));
+            dialog.dismiss();
+        }).setNegativeButton("Close",null).show();
     }
     private void toggleFavorite(){
         MediaController p=player();MediaItem item=p==null?null:p.getCurrentMediaItem();
@@ -133,7 +153,7 @@ public final class NowPlayingActivity extends AppCompatActivity {
             Bitmap result=bitmap;runOnUiThread(()->{if(value.equals(requestedArtwork)&&result!=null)cover.setImageBitmap(result);});
         });
     }
-    @Override protected void onStart(){super.onStart();screenStarted=true;controllerFuture=new MediaController.Builder(this,new SessionToken(this,new ComponentName(this,PlaybackService.class))).buildAsync();controllerFuture.addListener(()->{if(!screenStarted||isFinishing()||isDestroyed())return;try{controller=controllerFuture.get();controller.addListener(listener);refresh();}catch(Exception ignored){title.setText("Playback controls are unavailable");}},command->new Handler(Looper.getMainLooper()).post(command));handler.post(updateProgress);}
+    @Override protected void onStart(){super.onStart();screenStarted=true;controllerFuture=new MediaController.Builder(this,new SessionToken(this,new ComponentName(this,PlaybackService.class))).buildAsync();controllerFuture.addListener(()->{if(!screenStarted||isFinishing()||isDestroyed())return;try{controller=controllerFuture.get();controller.addListener(listener);float speed=getSharedPreferences("beatbox_settings",MODE_PRIVATE).getFloat("playback_speed",1f);if(Math.abs(controller.getPlaybackParameters().speed-speed)>0.02f)controller.setPlaybackParameters(new PlaybackParameters(speed));refresh();}catch(Exception ignored){title.setText("Playback controls are unavailable");}},command->new Handler(Looper.getMainLooper()).post(command));handler.post(updateProgress);}
     @Override protected void onStop(){screenStarted=false;handler.removeCallbacks(updateProgress);if(controller!=null)controller.removeListener(listener);if(controllerFuture!=null){MediaController.releaseFuture(controllerFuture);controllerFuture=null;controller=null;}super.onStop();}
     @Override protected void onDestroy(){artworkExecutor.shutdownNow();super.onDestroy();}
 }

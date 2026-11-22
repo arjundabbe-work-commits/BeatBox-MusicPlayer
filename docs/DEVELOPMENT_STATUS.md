@@ -21,6 +21,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 | Queue snapshot persistence and queue UI | Implemented; verification pending |
 | Favourites, playlists, playlist ordering, history, settings persistence | Implemented; verification pending |
 | Sleep timer | Implemented with saved deadline and shared-controller pause; JVM calculation tests added; Android background behavior pending verification |
+| Playback speed | 0.75×–2× through the shared MediaController with persisted preference; device verification pending |
 | Lyrics | Local LRC/text import and playback-synchronized highlighting implemented; parser tests added; Android flow pending verification |
 | Song-based local radio | Seed, artist, and album metadata drive a bounded local queue; JVM tests added; playback validation pending |
 | History-based recommendations and artist/genre-seeded radio | Not implemented; radio currently uses song artist/album metadata |
