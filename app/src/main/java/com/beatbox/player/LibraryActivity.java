@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 public final class LibraryActivity extends AppCompatActivity {
     private static final String[] CATEGORIES = {"All songs", "Albums", "Artists", "Folders", "Genres", "Recently added", "Recently played", "Favourites", "Playlists"};

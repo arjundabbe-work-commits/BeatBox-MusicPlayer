@@ -38,6 +38,7 @@ Status recorded 22 November 2026 for `codex/beatbox-android-reconstruction`.
 - GitHub Actions run #6, commit `72c1a6a`: the JVM test step passed, Android lint failed, and APK build steps were skipped. The three authored JVM algorithm tests therefore passed on this run; no lint report was uploaded.
 - CI diagnostics from run #9 identified a Java compile error in the favourites long-press lambda (`FavoritesActivity` lacked `return true`). Fixed in commit `e7536cc`'s successor; verification is pending in the next run.
 - The next CI run identified Room's required `@NonNull` annotations on three String primary keys (`favorites.mediaId`, `play_history.mediaId`, `settings.settingKey`). Added in this change; rerun required.
+- The following run reported the missing `TreeMap` import in `LibraryActivity`'s genre query; restored in this change.
 - API 35 emulator instrumentation job for run #6 was still running at the time of this report; do not treat it as passed until its final result is recorded.
 - A later workflow run (#7, commit `3ac5bc9`) failed during the JVM test step before lint/build; this is intermittent relative to run #6, which passed the same test classes. The next workflow emits the failing Gradle output as a check annotation.
 - The Actions logs REST endpoint returns HTTP 403 (`Must have admin rights to Repository`) in this environment, so the failing step's console output could not be retrieved.
