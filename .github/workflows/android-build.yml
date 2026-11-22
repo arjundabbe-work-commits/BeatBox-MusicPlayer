@@ -204,8 +204,9 @@ jobs:
             set +e
             timeout 10s adb shell input keyevent KEYCODE_WAKEUP || true
             timeout 10s adb shell wm dismiss-keyguard || true
-            ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace 2>&1 | tee gradle-connected-tests.log
-            test_status=${PIPESTATUS[0]}
+            ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace > gradle-connected-tests.log 2>&1
+            test_status=$?
+            cat gradle-connected-tests.log
             {
               echo "Gradle instrumentation exit code: $test_status"
               echo "--- ADB devices ---"
