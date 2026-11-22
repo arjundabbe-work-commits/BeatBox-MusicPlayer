@@ -29,7 +29,7 @@ public final class FavoritesActivity extends AppCompatActivity {
         empty=findViewById(R.id.empty); ListView list=findViewById(R.id.favorite_list);
         adapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,songs); list.setAdapter(adapter);
         list.setOnItemClickListener((p,v,pos,id)->play(pos));
-        list.setOnItemLongClickListener((p,v,pos,id)->{Song song=songs.get(pos); app.io.execute(()->{app.database().favorites().remove(Long.toString(song.id)); load();}); true;});
+        list.setOnItemLongClickListener((p,v,pos,id)->{Song song=songs.get(pos); app.io.execute(()->{app.database().favorites().remove(Long.toString(song.id)); load();}); return true;});
         findViewById(R.id.play_all).setOnClickListener(v->play(0));
     }
     private void load(){app.io.execute(()->{List<FavoriteEntity> rows=app.database().favorites().getAll();List<Song> found=new ArrayList<>();for(FavoriteEntity row:rows)found.add(new TrackRecord(row.mediaId,row.uri,row.title,row.artist,row.album,row.durationMs,row.artworkUri).toSong());runOnUiThread(()->{songs.clear();songs.addAll(found);adapter.notifyDataSetChanged();empty.setVisibility(songs.isEmpty()?android.view.View.VISIBLE:android.view.View.GONE);});});}
