@@ -190,30 +190,30 @@ jobs:
               for attempt in $(seq 1 120); do
                 {
                   printf "\n--- emulator boot probe %s ---\n" "$(date -Is)"
-                  adb devices -l
+                  timeout 8s adb devices -l || echo "ADB device listing timed out or failed"
                   printf "boot_completed="
-                  adb -s emulator-5554 shell getprop sys.boot_completed 2>&1
+                  timeout 8s adb -s emulator-5554 shell getprop sys.boot_completed 2>&1 || echo "boot-state query timed out or failed"
                   printf "boot_animation="
-                  adb -s emulator-5554 shell getprop init.svc.bootanim 2>&1
+                  timeout 8s adb -s emulator-5554 shell getprop init.svc.bootanim 2>&1 || echo "boot-animation query timed out or failed"
                 } >> "$GITHUB_WORKSPACE/emulator-boot-diagnostics.log" 2>&1
                 sleep 5
               done
             ' >/dev/null 2>&1 </dev/null &
           script: |
             set +e
-            adb shell input keyevent KEYCODE_WAKEUP
-            adb shell wm dismiss-keyguard
+            timeout 10s adb shell input keyevent KEYCODE_WAKEUP || true
+            timeout 10s adb shell wm dismiss-keyguard || true
             ./gradlew --no-daemon connectedDebugAndroidTest --stacktrace 2>&1 | tee gradle-connected-tests.log
             test_status=${PIPESTATUS[0]}
             {
               echo "Gradle instrumentation exit code: $test_status"
               echo "--- ADB devices ---"
-              adb devices -l
+              timeout 10s adb devices -l || echo "ADB device listing timed out or failed"
               echo "--- Emulator boot state ---"
-              adb -s emulator-5554 shell getprop sys.boot_completed
-              adb -s emulator-5554 shell getprop init.svc.bootanim
+              timeout 10s adb -s emulator-5554 shell getprop sys.boot_completed || echo "boot-state query timed out or failed"
+              timeout 10s adb -s emulator-5554 shell getprop init.svc.bootanim || echo "boot-animation query timed out or failed"
             } > emulator-device-diagnostics.log 2>&1
-            adb -s emulator-5554 logcat -d -b all -v threadtime '*:W' > emulator-logcat-warnings.txt 2>&1
+            timeout 15s adb -s emulator-5554 logcat -d -b all -v threadtime '*:W' > emulator-logcat-warnings.txt 2>&1 || echo "Logcat capture timed out or failed" >> emulator-logcat-warnings.txt
             exit "$test_status"
 
       - name: Capture emulator diagnostics
@@ -221,17 +221,17 @@ jobs:
         run: |
           {
             echo "--- ADB devices ---"
-            adb devices -l
+            timeout 10s adb devices -l || echo "ADB device listing timed out or failed"
             echo "--- Emulator state ---"
-            adb -s emulator-5554 get-state
+            timeout 10s adb -s emulator-5554 get-state || echo "Emulator state query timed out or failed"
             echo "--- Boot complete ---"
-            adb -s emulator-5554 shell getprop sys.boot_completed
+            timeout 10s adb -s emulator-5554 shell getprop sys.boot_completed || echo "boot-state query timed out or failed"
             echo "--- Boot animation ---"
-            adb -s emulator-5554 shell getprop init.svc.bootanim
+            timeout 10s adb -s emulator-5554 shell getprop init.svc.bootanim || echo "boot-animation query timed out or failed"
             echo "--- Emulator processes ---"
             ps -ef | grep -E '[q]emu|[e]mulator'
           } >> emulator-device-diagnostics.log 2>&1 || true
-          adb -s emulator-5554 logcat -d -b all -v threadtime '*:W' > emulator-logcat-warnings.txt 2>&1 || true
+          timeout 15s adb -s emulator-5554 logcat -d -b all -v threadtime '*:W' > emulator-logcat-warnings.txt 2>&1 || echo "Logcat capture timed out or failed" >> emulator-logcat-warnings.txt
 
       - name: Surface emulator failure details
         if: failure()
