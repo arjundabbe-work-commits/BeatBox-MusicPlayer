@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.SystemClock;
 import android.widget.ListView;
+import android.widget.TextView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -75,6 +76,19 @@ public final class BeatBoxUiTest {
         try (ActivityScenario<LyricsActivity> scenario = ActivityScenario.launch(LyricsActivity.class)) {
             SystemClock.sleep(300);
             onView(withText(startsWith("No song is playing"))).check(matches(isDisplayed()));
+        }
+    }
+
+    @Test public void playlistTitleAppearsBelowStatusBarInsets() {
+        try (ActivityScenario<PlaylistsActivity> scenario = ActivityScenario.launch(PlaylistsActivity.class)) {
+            scenario.onActivity(activity -> {
+                TextView title = activity.findViewById(R.id.playlists_title);
+                int[] location = new int[2];
+                title.getLocationOnScreen(location);
+                android.view.WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+                int statusBarBottom = insets == null ? 0 : insets.getSystemWindowInsetTop();
+                org.junit.Assert.assertTrue("Playlist title overlaps the status bar", location[1] >= statusBarBottom);
+            });
         }
     }
 }
